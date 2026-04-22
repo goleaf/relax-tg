@@ -21,22 +21,26 @@ class PracticesTable
                 TextColumn::make('day')
                     ->label('Day')
                     ->sortable()
-                    ->formatStateUsing(fn (int $state): string => "{$state} Day"),
+                    ->formatStateUsing(fn (int $state): string => "{$state} Day")
+                    ->width('100px'),
                 TextColumn::make("title.{$locale}")
                     ->label('Title')
                     ->searchable()
                     ->sortable()
-                    ->limit(50),
+                    ->limit(50)
+                    ->width('250px'),
                 TextColumn::make("description.{$locale}")
                     ->label('Description')
                     ->limit(80)
                     ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->width('400px'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->width('150px'),
             ])
             ->filters([
                 //
