@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Languages\Tables;
 
-use Filament\Actions\BulkActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -27,9 +26,7 @@ class LanguagesTable
                 //
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    //
-                ]),
+                //
             ]);
     }
 }

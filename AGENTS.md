@@ -41,6 +41,10 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
 
+## Bulk Actions
+
+- DO NOT use bulk actions (checkboxes, `BulkActionGroup`, `DeleteBulkAction`, etc.) in any tables. They must be explicitly removed/omitted to keep the UI clean and prevent bulk operations.
+
 ## Application Structure & Architecture
 
 - Stick to existing directory structure; don't create new base folders without approval.
