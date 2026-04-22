@@ -13,12 +13,28 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 
 class PracticeResource extends Resource
 {
     protected static ?string $model = Practice::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Content';
+
+    protected static ?int $navigationSort = 1;
+
+    /** @param Practice|null $record */
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        if ($record === null) {
+            return static::getModelLabel();
+        }
+
+        return $record->getTitle(app()->getLocale());
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -32,9 +48,7 @@ class PracticeResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

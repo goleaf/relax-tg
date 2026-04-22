@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Language;
 use App\Models\Practice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,17 +18,18 @@ class PracticeFactory extends Factory
      */
     public function definition(): array
     {
-        $languages = \App\Models\Language::where('is_enabled', true)->pluck('code')->toArray();
-        if (empty($languages)) {
-            $languages = ['en'];
+        $codes = once(fn () => Language::where('is_enabled', true)->pluck('code')->toArray());
+
+        if (empty($codes)) {
+            $codes = ['en'];
         }
 
         $title = [];
         $description = [];
 
-        foreach ($languages as $code) {
-            $title[$code] = $this->faker->words(3, true) . " ({$code})";
-            $description[$code] = $this->faker->paragraph(3) . " ({$code})";
+        foreach ($codes as $code) {
+            $title[$code] = $this->faker->sentence(4, false);
+            $description[$code] = $this->faker->paragraphs(2, true);
         }
 
         return [
