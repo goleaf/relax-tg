@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Practice;
 use Illuminate\Database\Seeder;
 
 class PracticeSeeder extends Seeder
@@ -12,6 +12,11 @@ class PracticeSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Practice::factory(20)->create();
+        // Create 2 practices for each of the 29 days to ensure content across all submenus.
+        for ($day = 1; $day <= 29; $day++) {
+            Practice::factory(2)->create([
+                'day' => $day,
+            ]);
+        }
     }
 }
