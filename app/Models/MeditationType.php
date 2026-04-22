@@ -10,7 +10,6 @@ class MeditationType extends Model
     use HasFactory;
 
     protected $fillable = [
-        'slug',
         'title',
         'is_enabled',
     ];

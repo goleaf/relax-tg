@@ -9,9 +9,8 @@ class ModuleChoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'slug' => $this->faker->unique()->slug(),
             'title' => [
-                'en' => $this->faker->word(),
+                'en' => $this->faker->unique()->word(),
                 'ru' => $this->faker->word(),
             ],
             'is_enabled' => true,

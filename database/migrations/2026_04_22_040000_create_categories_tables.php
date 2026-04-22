@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('focus_problems', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
             $table->json('title');
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();
@@ -18,7 +17,6 @@ return new class extends Migration
 
         Schema::create('experience_levels', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
             $table->json('title');
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();
@@ -26,7 +24,6 @@ return new class extends Migration
 
         Schema::create('module_choices', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
             $table->json('title');
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();
@@ -34,7 +31,6 @@ return new class extends Migration
 
         Schema::create('meditation_types', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
             $table->json('title');
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();

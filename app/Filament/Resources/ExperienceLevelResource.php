@@ -42,10 +42,6 @@ class ExperienceLevelResource extends Resource
             ->components([
                 Section::make('General')
                     ->schema([
-                        TextInput::make('slug')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
                         Toggle::make('is_enabled')
                             ->label('Enabled')
                             ->default(true),
@@ -70,9 +66,6 @@ class ExperienceLevelResource extends Resource
 
         return $table
             ->columns([
-                TextColumn::make('slug')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make("title.{$locale}")
                     ->label('Title')
                     ->searchable()

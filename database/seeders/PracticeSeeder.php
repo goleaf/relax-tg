@@ -15,44 +15,44 @@ class PracticeSeeder extends Seeder
     {
         // 1. Seed Categories
         $focusProblems = [
-            ['slug' => 'anxiety', 'title' => ['en' => 'Anxiety', 'ru' => 'Тревога']],
-            ['slug' => 'fatigue', 'title' => ['en' => 'Fatigue', 'ru' => 'Усталость']],
-            ['slug' => 'focus', 'title' => ['en' => 'Focus', 'ru' => 'Фокус']],
-            ['slug' => 'anger', 'title' => ['en' => 'Anger', 'ru' => 'Гнев']],
-            ['slug' => 'autopilot', 'title' => ['en' => 'Autopilot', 'ru' => 'Автопилот']],
+            ['title' => ['en' => 'Anxiety', 'ru' => 'Тревога']],
+            ['title' => ['en' => 'Fatigue', 'ru' => 'Усталость']],
+            ['title' => ['en' => 'Focus', 'ru' => 'Фокус']],
+            ['title' => ['en' => 'Anger', 'ru' => 'Гнев']],
+            ['title' => ['en' => 'Autopilot', 'ru' => 'Автопилот']],
         ];
         foreach ($focusProblems as $item) {
-            FocusProblem::updateOrCreate(['slug' => $item['slug']], $item);
+            FocusProblem::create($item);
         }
 
         $experienceLevels = [
-            ['slug' => 'beginner', 'title' => ['en' => 'Beginner', 'ru' => 'Новичок']],
-            ['slug' => 'intermediate', 'title' => ['en' => 'Intermediate', 'ru' => 'Средний']],
-            ['slug' => 'advanced', 'title' => ['en' => 'Advanced', 'ru' => 'Продвинутый']],
+            ['title' => ['en' => 'Beginner', 'ru' => 'Новичок']],
+            ['title' => ['en' => 'Intermediate', 'ru' => 'Средний']],
+            ['title' => ['en' => 'Advanced', 'ru' => 'Продвинутый']],
         ];
         foreach ($experienceLevels as $item) {
-            ExperienceLevel::updateOrCreate(['slug' => $item['slug']], $item);
+            ExperienceLevel::create($item);
         }
 
         $moduleChoices = [
-            ['slug' => 'main', 'title' => ['en' => 'Main', 'ru' => 'Главный']],
-            ['slug' => 'nutrition', 'title' => ['en' => 'Nutrition', 'ru' => 'Питание']],
-            ['slug' => 'all', 'title' => ['en' => 'All', 'ru' => 'Все']],
+            ['title' => ['en' => 'Main', 'ru' => 'Главный']],
+            ['title' => ['en' => 'Nutrition', 'ru' => 'Питание']],
+            ['title' => ['en' => 'All', 'ru' => 'Все']],
         ];
         foreach ($moduleChoices as $item) {
-            ModuleChoice::updateOrCreate(['slug' => $item['slug']], $item);
+            ModuleChoice::create($item);
         }
 
         $meditationTypes = [
-            ['slug' => 'breath', 'title' => ['en' => 'Breath', 'ru' => 'Дыхание']],
-            ['slug' => 'body', 'title' => ['en' => 'Body', 'ru' => 'Тело']],
-            ['slug' => 'observation', 'title' => ['en' => 'Observation', 'ru' => 'Наблюдение']],
-            ['slug' => 'movement', 'title' => ['en' => 'Movement', 'ru' => 'Движение']],
-            ['slug' => 'pause', 'title' => ['en' => 'Pause', 'ru' => 'Пауза']],
-            ['slug' => 'space', 'title' => ['en' => 'Space', 'ru' => 'Пространство']],
+            ['title' => ['en' => 'Breath', 'ru' => 'Дыхание']],
+            ['title' => ['en' => 'Body', 'ru' => 'Тело']],
+            ['title' => ['en' => 'Observation', 'ru' => 'Наблюдение']],
+            ['title' => ['en' => 'Movement', 'ru' => 'Движение']],
+            ['title' => ['en' => 'Pause', 'ru' => 'Пауза']],
+            ['title' => ['en' => 'Space', 'ru' => 'Пространство']],
         ];
         foreach ($meditationTypes as $item) {
-            MeditationType::updateOrCreate(['slug' => $item['slug']], $item);
+            MeditationType::create($item);
         }
 
         // 2. Seed Practices
