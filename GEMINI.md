@@ -174,4 +174,18 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Always place database-related tests (Models, Filament Resources) in the `tests/Feature` directory, not `Unit`.
 - For testing Filament list pages with tabs, use `Livewire::test(Page::class)->set('activeTab', 'tab-name')` instead of `->filterTable()`.
 
+=== multilingual forms rules ===
+
+## Multilingual Filament Forms
+
+- ALWAYS use `App\Filament\Support\LanguageTabsBuilder::make(callable $fieldFactory)` when building multi-language form tabs. Never build language tabs manually.
+- The builder automatically queries `Language::where('is_enabled', true)`, renders a flagged tab per language, and returns a ready-to-embed `Tabs` component.
+- Each tab label must be an `HtmlString` containing the rendered `<x-flag-language-{code} />` SVG + language name. Never return a plain `string` — it will be escaped and show raw SVG.
+- Flag icons use the `outhebox/blade-flags` package. Always render with `Blade::render('<x-flag-language-{code} />')` and wrap in `new HtmlString(...)`.
+- Form fields inside tabs must use dot-notation keys: `"title.{$language->code}"`, `"description.{$language->code}"`, etc.
+- The `title` / `description` (and any translated column) must be `json` columns in the migration and cast as `'array'` in the model.
+- Models with translated fields must expose `getTitle(string $locale): string` and `getDescription(string $locale): ?string` helpers with EN fallback.
+- The Filament resource must override `getRecordTitle(?Model $record)` to return a string (e.g., `$record->getTitle(app()->getLocale())`) — never set `$recordTitleAttribute` to a JSON column.
+- The admin panel language switcher is a Livewire component at `App\Livewire\Filament\LanguageSwitcher`, injected via `PanelsRenderHook::TOPBAR_START`. It stores the active locale in `session('admin_locale')`.
+
 </laravel-boost-guidelines>
