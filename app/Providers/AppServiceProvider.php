@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Language;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            // Dynamically load enabled languages from the database.
+            // Falls back to ['en'] if the table doesn't exist yet (e.g. fresh install).
+            $locales = Schema::hasTable('languages')
+                ? Language::where('is_enabled', true)->pluck('code')->toArray()
+                : ['en'];
+
+            $switch->locales($locales);
+        });
     }
 }

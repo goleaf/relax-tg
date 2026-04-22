@@ -29,6 +29,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - `laravel-best-practices` — Apply this skill whenever writing, reviewing, or refactoring Laravel PHP code. This includes creating or modifying controllers, models, migrations, form requests, policies, jobs, scheduled commands, service classes, and Eloquent queries. Triggers for N+1 and query performance issues, caching strategies, authorization and security patterns, validation, error handling, queue and job configuration, route definitions, and architectural decisions. Also use for Laravel code reviews and refactoring existing Laravel code to follow best practices. Covers any task involving Laravel backend PHP code patterns.
 - `pest-testing` — Use this skill for Pest PHP testing in Laravel projects only. Trigger whenever any test is being written, edited, fixed, or refactored — including fixing tests that broke after a code change, adding assertions, converting PHPUnit to Pest, adding datasets, and TDD workflows. Always activate when the user asks how to write something in Pest, mentions test files or directories (tests/Feature, tests/Unit, tests/Browser), or needs browser testing, smoke testing multiple pages for JS errors, or architecture tests. Covers: test()/it()/expect() syntax, datasets, mocking, browser testing (visit/click/fill), smoke testing, arch(), Livewire component tests, RefreshDatabase, and all Pest 4 features. Do not use for factories, seeders, migrations, controllers, models, or non-test PHP code.
 - `tailwindcss-development` — Always invoke when the user's message includes 'tailwind' in any form. Also invoke for: building responsive grid layouts (multi-column card grids, product grids), flex/grid page structures (dashboards with sidebars, fixed topbars, mobile-toggle navs), styling UI components (cards, tables, navbars, pricing sections, forms, inputs, badges), adding dark mode variants, fixing spacing or typography, and Tailwind v3/v4 work. The core use case: writing or fixing Tailwind utility classes in HTML templates (Blade, JSX, Vue). Skip for backend PHP logic, database queries, API routes, JavaScript with no HTML/CSS component, CSS file audits, build tool configuration, and vanilla CSS.
+- `language-switcher` — The admin panel language switcher uses the `bezhansalleh/filament-language-switch` package. Configure it in `AppServiceProvider::boot()` by calling `LanguageSwitch::configureUsing()` with locales loaded dynamically from `Language::where('is_enabled', true)`. Never build a custom Livewire switcher — use this package.
 
 ## Conventions
 
@@ -120,6 +121,13 @@ This project has domain-specific skills available. You MUST activate the relevan
 - The application is served by Laravel Herd at `https?://[kebab-case-project-dir].test`. Use the `get-absolute-url` tool to generate valid URLs. Never run commands to serve the site. It is always available.
 - Use the `herd` CLI to manage services, PHP versions, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`). Run `herd list` to discover all available commands.
 
+=== tests rules ===
+
+# Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+
 === laravel/core rules ===
 
 # Do Things the Laravel Way
@@ -157,35 +165,12 @@ This project has domain-specific skills available. You MUST activate the relevan
 - If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
 - Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
 
-## Language Module Architecture
-
-- The Language module is purely based on a pre-seeded table of all world languages.
-- AI must NOT add forms, create, edit, or delete actions to the Language resource.
-- The `LanguagesTable` must NOT include `created_at` or `updated_at` columns, and must NOT allow sorting on any columns except where explicitly necessary (e.g., sortable name is disabled).
-- Languages are managed purely by toggling the `is_enabled` switch.
-
 === pest/core rules ===
 
 ## Pest
 
 - This project uses Pest for testing. Create tests: `php artisan make:test --pest {name}`.
-- Run tests: `vendor/bin/pest` directly to avoid TTY process errors, or use `php artisan test --compact`.
+- Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
 - Do NOT delete tests without approval.
-- Always place database-related tests (Models, Filament Resources) in the `tests/Feature` directory, not `Unit`.
-- For testing Filament list pages with tabs, use `Livewire::test(Page::class)->set('activeTab', 'tab-name')` instead of `->filterTable()`.
-
-=== multilingual forms rules ===
-
-## Multilingual Filament Forms
-
-- ALWAYS use `App\Filament\Support\LanguageTabsBuilder::make(callable $fieldFactory)` when building multi-language form tabs. Never build language tabs manually.
-- The builder automatically queries `Language::where('is_enabled', true)`, renders a flagged tab per language, and returns a ready-to-embed `Tabs` component.
-- Each tab label must be an `HtmlString` containing the rendered `<x-flag-language-{code} />` SVG + language name. Never return a plain `string` — it will be escaped and show raw SVG.
-- Flag icons use the `outhebox/blade-flags` package. Always render with `Blade::render('<x-flag-language-{code} />')` and wrap in `new HtmlString(...)`.
-- Form fields inside tabs must use dot-notation keys: `"title.{$language->code}"`, `"description.{$language->code}"`, etc.
-- The `title` / `description` (and any translated column) must be `json` columns in the migration and cast as `'array'` in the model.
-- Models with translated fields must expose `getTitle(string $locale): string` and `getDescription(string $locale): ?string` helpers with EN fallback.
-- The Filament resource must override `getRecordTitle(?Model $record)` to return a string (e.g., `$record->getTitle(app()->getLocale())`) — never set `$recordTitleAttribute` to a JSON column.
-- The admin panel language switcher is a Livewire component at `App\Livewire\Filament\LanguageSwitcher`, injected via `PanelsRenderHook::TOPBAR_START`. It stores the active locale in `session('admin_locale')`.
 
 </laravel-boost-guidelines>
