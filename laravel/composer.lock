@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7064e44d7b5506afdddd28990e7816a",
+    "content-hash": "3dc8bc3d57c3bbe87e3be064d6ee6762",
     "packages": [
         {
             "name": "bezhansalleh/filament-language-switch",
@@ -2125,6 +2125,74 @@
                 "source": "https://github.com/irazasyed/telegram-bot-sdk/tree/v3.16.0"
             },
             "time": "2026-03-07T09:57:43+00:00"
+        },
+        {
+            "name": "jeffersongoncalves/filament-topbar",
+            "version": "3.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jeffersongoncalves/filament-topbar.git",
+                "reference": "a7bbb645da21f6be1503316e5af3613a512875da"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jeffersongoncalves/filament-topbar/zipball/a7bbb645da21f6be1503316e5af3613a512875da",
+                "reference": "a7bbb645da21f6be1503316e5af3613a512875da",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^5.3",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.14.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.21",
+                "orchestra/testbench": "^9.0|^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "JeffersonGoncalves\\Filament\\Topbar\\TopbarServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "JeffersonGoncalves\\Filament\\Topbar\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jefferson Gonçalves",
+                    "email": "gerson.simao.92@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A simple yet effective Filament plugin that automatically adds a customized topbar to your Filament admin panel. This plugin enhances your Filament panel's user experience by replacing the default topbar component with an improved version that displays navigation and user interface elements in strategic locations.",
+            "homepage": "https://github.com/jeffersongoncalves/filament-topbar",
+            "keywords": [
+                "filament",
+                "filament-topbar",
+                "jeffersongoncalves",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/jeffersongoncalves/filament-topbar/issues",
+                "source": "https://github.com/jeffersongoncalves/filament-topbar/tree/3.0.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/jeffersongoncalves",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-03-04T03:18:56+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",

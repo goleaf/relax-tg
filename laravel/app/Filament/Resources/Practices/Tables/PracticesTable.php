@@ -31,7 +31,7 @@ class PracticesTable
         array $headerActions = [],
     ): Table {
         return $table
-            ->defaultSort('id', 'desc')
+            ->defaultSort('day', 'asc')
             ->columns([
                 TextColumn::make('day')
                     ->label(__('admin.resources.practices.fields.day'))

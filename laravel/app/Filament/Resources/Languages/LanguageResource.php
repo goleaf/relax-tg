@@ -6,6 +6,7 @@ use App\Filament\Resources\Languages\Pages\ListLanguages;
 use App\Filament\Resources\Languages\Tables\LanguagesTable;
 use App\Models\Language;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -14,8 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 class LanguageResource extends Resource
 {
     protected static ?string $model = Language::class;
-
-    protected static bool $shouldRegisterNavigation = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -34,6 +33,18 @@ class LanguageResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin.resources.languages.navigation');
+    }
+
+    /**
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(): array
+    {
+        return collect(parent::getNavigationItems())
+            ->map(fn (NavigationItem $item): NavigationItem => $item->extraAttributes([
+                'data-test-topbar-link' => 'languages',
+            ]))
+            ->all();
     }
 
     public static function table(Table $table): Table

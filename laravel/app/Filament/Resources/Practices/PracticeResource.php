@@ -41,24 +41,15 @@ class PracticeResource extends Resource
         return __('admin.resources.practices.navigation');
     }
 
-    public static function getNavigationGroup(): string|\UnitEnum|null
-    {
-        return __('admin.navigation_groups.content');
-    }
-
+    /**
+     * @return array<NavigationItem>
+     */
     public static function getNavigationItems(): array
     {
-        return collect(Practice::getNavigationTree())
-            ->map(function (array $dayData): NavigationItem {
-                $day = $dayData['day'];
-
-                return NavigationItem::make(Practice::formatDay($day)." ({$dayData['count']})")
-                    ->group(__('admin.navigation_groups.daily_practices'))
-                    ->icon(static::getNavigationIcon())
-                    ->sort($day)
-                    ->isActiveWhen(fn (): bool => static::isDayNavigationItemActive($day))
-                    ->url(static::getNavigationUrlForDay($day));
-            })
+        return collect(parent::getNavigationItems())
+            ->map(fn (NavigationItem $item): NavigationItem => $item->extraAttributes([
+                'data-test-topbar-link' => 'practices',
+            ]))
             ->all();
     }
 
@@ -66,20 +57,6 @@ class PracticeResource extends Resource
     {
         return parent::getEloquentQuery()
             ->forResourceIndex();
-    }
-
-    private static function getNavigationUrlForDay(int $day): string
-    {
-        return static::getUrl('index', [
-            'filters' => [
-                'day' => ['value' => $day],
-            ],
-        ]);
-    }
-
-    private static function isDayNavigationItemActive(int $day): bool
-    {
-        return (int) data_get(request()->query('filters', []), 'day.value') === $day;
     }
 
     /** @param Practice|null $record */

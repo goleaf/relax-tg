@@ -6,13 +6,12 @@ use App\Filament\Widgets\FocusProblemDistributionChart;
 use App\Filament\Widgets\PracticeDurationChart;
 use App\Filament\Widgets\PracticeOverviewStats;
 use App\Filament\Widgets\PracticeVolumeChart;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\Widget;
 
 class Dashboard extends BaseDashboard
 {
-    protected static bool $shouldRegisterNavigation = false;
-
     /**
      * @return array<class-string<Widget>>
      */
@@ -32,5 +31,17 @@ class Dashboard extends BaseDashboard
             'md' => 2,
             'xl' => 2,
         ];
+    }
+
+    /**
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(): array
+    {
+        return collect(parent::getNavigationItems())
+            ->map(fn (NavigationItem $item): NavigationItem => $item->extraAttributes([
+                'data-test-topbar-link' => 'dashboard',
+            ]))
+            ->all();
     }
 }

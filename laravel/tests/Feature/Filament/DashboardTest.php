@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\Languages\LanguageResource;
+use App\Filament\Resources\Practices\PracticeResource;
 use App\Filament\Widgets\FocusProblemDistributionChart;
 use App\Filament\Widgets\PracticeDurationChart;
 use App\Filament\Widgets\PracticeOverviewStats;
@@ -49,17 +50,38 @@ test('dashboard renders custom widgets and removes the default dashboard cards',
         ->assertDontSeeText('Welcome');
 });
 
-test('dashboard and languages are rendered in the topbar and removed from sidebar navigation registration', function () {
+test('dashboard, practices, categories, and languages are rendered in the plugin top navigation order', function () {
     $this->get('/')
         ->assertSuccessful()
-        ->assertSee('data-test-topbar-primary-navigation', false)
+        ->assertDontSee('data-test-topbar-primary-navigation', false)
+        ->assertSee('class="fi-topbar-nav-groups"', false)
         ->assertSee('data-test-topbar-link="dashboard"', false)
+        ->assertSee('data-test-topbar-link="practices"', false)
+        ->assertSee('data-test-topbar-link="categories"', false)
         ->assertSee('data-test-topbar-link="languages"', false)
         ->assertSeeText('Dashboard')
+        ->assertSeeText('Practices')
+        ->assertSeeText('Categories')
         ->assertSeeText('Languages');
 
-    expect(Dashboard::shouldRegisterNavigation())->toBeFalse()
-        ->and(LanguageResource::shouldRegisterNavigation())->toBeFalse();
+    $topNavigationLabels = collect(filament()->getCurrentOrDefaultPanel()->buildNavigation())
+        ->flatMap(fn ($group): array => filled($group->getLabel())
+            ? [$group->getLabel()]
+            : collect($group->getItems())
+                ->map(fn ($item): string => $item->getLabel())
+                ->all())
+        ->values()
+        ->all();
+
+    expect(Dashboard::shouldRegisterNavigation())->toBeTrue()
+        ->and(PracticeResource::shouldRegisterNavigation())->toBeTrue()
+        ->and($topNavigationLabels)->toBe([
+            'Dashboard',
+            'Practices',
+            'Categories',
+            'Languages',
+        ])
+        ->and(LanguageResource::shouldRegisterNavigation())->toBeTrue();
 });
 
 test('dashboard widgets summarize practice metrics', function () {

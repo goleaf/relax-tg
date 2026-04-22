@@ -49,6 +49,19 @@ test('can list practices', function () {
         ->assertCanSeeTableRecords($practices);
 });
 
+test('practice list defaults to sorting by day ascending', function () {
+    $dayThreePractice = Practice::factory()->create(['day' => 3]);
+    $dayOnePractice = Practice::factory()->create(['day' => 1]);
+    $dayTwoPractice = Practice::factory()->create(['day' => 2]);
+
+    Livewire::test(ListPractices::class)
+        ->assertCanSeeTableRecords([
+            $dayOnePractice,
+            $dayTwoPractice,
+            $dayThreePractice,
+        ], inOrder: true);
+});
+
 test('practice list uses inline live filters and hides media and created columns', function () {
     $practice = Practice::factory()->create();
 
@@ -588,42 +601,19 @@ test('can delete a practice', function () {
     Storage::disk(Practice::mediaDisk())->assertMissing($videoPath);
 });
 
-test('practice navigation shows flat day items with counts', function () {
-    $focusProblem = FocusProblem::factory()->create([
-        'title' => ['en' => 'Anxiety', 'ru' => 'Тревога'],
-    ]);
-    $otherFocusProblem = FocusProblem::factory()->create([
-        'title' => ['en' => 'Fatigue', 'ru' => 'Усталость'],
-    ]);
-    $experienceLevel = ExperienceLevel::factory()->create([
-        'title' => ['en' => 'Beginner', 'ru' => 'Новичок'],
-    ]);
-    $moduleChoice = ModuleChoice::factory()->create([
-        'title' => ['en' => 'Main', 'ru' => 'Главный'],
-    ]);
-    $meditationType = MeditationType::factory()->create([
-        'title' => ['en' => 'Breath', 'ru' => 'Дыхание'],
-    ]);
-
-    Practice::factory()->create([
+test('practice navigation does not expose per-day submenu items', function () {
+    Practice::factory()->count(2)->create([
         'day' => 1,
-        'focus_problem_id' => $focusProblem->id,
-        'experience_level_id' => $experienceLevel->id,
-        'module_choice_id' => $moduleChoice->id,
-        'meditation_type_id' => $meditationType->id,
     ]);
 
-    Practice::factory()->create([
-        'day' => 1,
-        'focus_problem_id' => $otherFocusProblem->id,
-        'experience_level_id' => $experienceLevel->id,
-        'module_choice_id' => $moduleChoice->id,
-        'meditation_type_id' => $meditationType->id,
-    ]);
+    $navigationItems = collect(PracticeResource::getNavigationItems());
+    $navigationLabels = $navigationItems
+        ->map(fn ($item): string => $item->getLabel())
+        ->all();
 
-    $dayOneNavigationItem = collect(PracticeResource::getNavigationItems())
-        ->first(fn ($item) => $item->getLabel() === '1 Day (2)');
-
-    expect($dayOneNavigationItem)->not->toBeNull();
-    expect($dayOneNavigationItem->getChildItems())->toBe([]);
+    expect($navigationItems)->toHaveCount(1)
+        ->and($navigationLabels)->toContain(PracticeResource::getNavigationLabel())
+        ->and($navigationLabels)->not->toContain(Practice::formatCountedLabel(Practice::formatDay(1), 2))
+        ->and($navigationItems->first()->getGroup())->toBeNull()
+        ->and($navigationItems->first()->getChildItems())->toBe([]);
 });
