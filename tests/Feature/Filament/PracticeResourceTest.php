@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\ExperienceLevel;
+use App\Enums\FocusProblem;
+use App\Enums\MeditationType;
+use App\Enums\ModuleChoice;
 use App\Filament\Resources\Practices\Pages\CreatePractice;
 use App\Filament\Resources\Practices\Pages\EditPractice;
 use App\Filament\Resources\Practices\Pages\ListPractices;
@@ -38,6 +42,11 @@ test('can create a practice', function () {
     Livewire::test(CreatePractice::class)
         ->fillForm([
             'day' => 1,
+            'focus_problem' => FocusProblem::Focus,
+            'experience_level' => ExperienceLevel::Beginner,
+            'module_choice' => ModuleChoice::Main,
+            'meditation_type' => MeditationType::Breath,
+            'duration' => 600,
             'title.en' => 'Mindful Breathing',
             'description.en' => 'A simple breathing practice for daily calm.',
         ])
@@ -46,6 +55,7 @@ test('can create a practice', function () {
 
     expect(Practice::query()
         ->whereJsonContains('title->en', 'Mindful Breathing')
+        ->where('focus_problem', FocusProblem::Focus)
         ->exists()
     )->toBeTrue();
 });

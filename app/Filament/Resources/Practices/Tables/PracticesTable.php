@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Practices\Tables;
 
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -27,12 +28,21 @@ class PracticesTable
                     ->sortable()
                     ->limit(50)
                     ->width('250px'),
-                TextColumn::make("description.{$locale}")
-                    ->label('Description')
-                    ->limit(80)
-                    ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->width('400px'),
+                TextColumn::make('meditation_type')
+                    ->label('Type')
+                    ->badge()
+                    ->sortable()
+                    ->width('120px'),
+                TextColumn::make('duration')
+                    ->label('Duration')
+                    ->formatStateUsing(fn (int $state): string => floor($state / 60).':'.str_pad($state % 60, 2, '0', STR_PAD_LEFT))
+                    ->sortable()
+                    ->width('100px'),
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean()
+                    ->sortable()
+                    ->width('80px'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
