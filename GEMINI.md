@@ -173,4 +173,17 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
 - Do NOT delete tests without approval.
 
+=== multilingual forms rules ===
+
+## Multilingual Filament Forms
+
+- ALWAYS use `App\Filament\Support\LanguageTabsBuilder::make(callable $fieldFactory)` when building multi-language form tabs. Never build language tabs manually.
+- The builder automatically queries `Language::where('is_enabled', true)`, sorts them ASC by name, and returns a ready-to-embed `Tabs` component.
+- Each tab label must be the plain language name (e.g., "English", "Russian"). DO NOT include flag icons or raw SVG in the labels.
+- Form fields inside tabs must use dot-notation keys: `"title.{$language->code}"`, `"description.{$language->code}"`, etc.
+- The `title` / `description` (and any translated column) must be `json` columns in the migration and cast as `'array'` in the model.
+- Models with translated fields must expose `getTitle(string $locale): string` and `getDescription(string $locale): ?string` helpers with EN fallback.
+- The Filament resource must override `getRecordTitle(?Model $record)` to return a string (e.g., `$record->getTitle(app()->getLocale())`) — never set `$recordTitleAttribute` to a JSON column.
+- The admin panel language switcher uses the `bezhansalleh/filament-language-switch` package. Configure it in `AppServiceProvider::boot()` by calling `LanguageSwitch::configureUsing()` with locales loaded dynamically from `Language::where('is_enabled', true)`. Never build a custom Livewire switcher — use this package.
+
 </laravel-boost-guidelines>
