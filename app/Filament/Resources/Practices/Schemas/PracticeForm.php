@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Practices\Schemas;
 
 use App\Models\Language;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\TextInput;
-use Filament\Schemas\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class PracticeForm
@@ -18,10 +18,10 @@ class PracticeForm
             return Tabs\Tab::make($language->name)
                 ->schema([
                     TextInput::make("title.{$language->code}")
-                        ->label('Title (' . strtoupper($language->code) . ')')
+                        ->label('Title ('.strtoupper($language->code).')')
                         ->required($language->code === 'en'),
                     Textarea::make("description.{$language->code}")
-                        ->label('Description (' . strtoupper($language->code) . ')')
+                        ->label('Description ('.strtoupper($language->code).')')
                         ->rows(5),
                 ]);
         })->toArray();
