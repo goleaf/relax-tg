@@ -15,8 +15,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class PracticeResource extends Resource
 {
@@ -30,22 +30,38 @@ class PracticeResource extends Resource
 
     public static function getNavigationItems(): array
     {
-        $items = [];
+        return collect(Practice::getNavigationTree())
+            ->map(function (array $dayData): NavigationItem {
+                $day = $dayData['day'];
 
-        $counts = Practice::select('day', DB::raw('count(*) as total'))
-            ->groupBy('day')
-            ->pluck('total', 'day');
+                return NavigationItem::make(Practice::formatDay($day)." ({$dayData['count']})")
+                    ->group('Daily Practices')
+                    ->icon(static::getNavigationIcon())
+                    ->sort($day)
+                    ->isActiveWhen(fn (): bool => static::isDayNavigationItemActive($day))
+                    ->url(static::getNavigationUrlForDay($day));
+            })
+            ->all();
+    }
 
-        for ($i = 1; $i <= 29; $i++) {
-            $count = $counts[$i] ?? 0;
-            $items[] = NavigationItem::make("{$i} Day ({$count})")
-                ->group('Daily Practices')
-                ->icon(static::getNavigationIcon())
-                ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.practices.index') && request()->query('day') == $i)
-                ->url(static::getUrl('index', ['day' => $i]));
-        }
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->forResourceIndex();
+    }
 
-        return $items;
+    private static function getNavigationUrlForDay(int $day): string
+    {
+        return static::getUrl('index', [
+            'filters' => [
+                'day' => ['value' => $day],
+            ],
+        ]);
+    }
+
+    private static function isDayNavigationItemActive(int $day): bool
+    {
+        return (int) data_get(request()->query('filters', []), 'day.value') === $day;
     }
 
     /** @param Practice|null $record */

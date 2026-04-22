@@ -7,6 +7,8 @@ use Illuminate\Database\Seeder;
 
 class LanguageSeeder extends Seeder
 {
+    private const DEFAULT_ENABLED_CODES = ['en', 'ru'];
+
     /**
      * Run the database seeds.
      */
@@ -15,13 +17,17 @@ class LanguageSeeder extends Seeder
         $languages = config('languages');
 
         foreach ($languages as $code => $name) {
-            Language::firstOrCreate(
+            Language::query()->updateOrCreate(
                 ['code' => $code],
-                ['name' => $name, 'is_enabled' => false]
+                [
+                    'name' => $name,
+                    'is_enabled' => in_array($code, self::DEFAULT_ENABLED_CODES, true),
+                ],
             );
         }
 
-        // Enable English and Russian by default
-        Language::whereIn('code', ['en', 'ru'])->update(['is_enabled' => true]);
+        Language::query()
+            ->whereNotIn('code', self::DEFAULT_ENABLED_CODES)
+            ->update(['is_enabled' => false]);
     }
 }

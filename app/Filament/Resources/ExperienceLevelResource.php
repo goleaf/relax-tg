@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExperienceLevelResource\Pages;
+use App\Filament\Resources\ExperienceLevelResource\RelationManagers\PracticesRelationManager;
 use App\Filament\Support\LanguageTabsBuilder;
 use App\Models\ExperienceLevel;
 use App\Models\Language;
@@ -15,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class ExperienceLevelResource extends Resource
@@ -44,7 +46,7 @@ class ExperienceLevelResource extends Resource
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label('Title')
-                                    ->required($language->code === 'en')
+                                    ->required()
                                     ->maxLength(255),
                             ];
                         }),
@@ -54,11 +56,10 @@ class ExperienceLevelResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $locale = app()->getLocale();
-
         return $table
+            ->defaultSort('id')
             ->columns([
-                TextColumn::make("title.{$locale}")
+                TextColumn::make(ExperienceLevel::titleAttribute())
                     ->label('Title')
                     ->searchable()
                     ->sortable(),
@@ -75,10 +76,16 @@ class ExperienceLevelResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->forFilamentIndex();
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            PracticesRelationManager::class,
         ];
     }
 

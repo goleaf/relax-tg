@@ -2,17 +2,27 @@
 
 namespace Database\Factories;
 
+use App\Models\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ModuleChoiceFactory extends Factory
 {
     public function definition(): array
     {
+        $codes = Language::enabled()->pluck('code')->all();
+
+        if ($codes === []) {
+            $codes = ['en'];
+        }
+
+        $title = [];
+
+        foreach ($codes as $code) {
+            $title[$code] = $this->faker->words(2, true);
+        }
+
         return [
-            'title' => [
-                'en' => $this->faker->unique()->word(),
-                'ru' => $this->faker->word(),
-            ],
+            'title' => $title,
         ];
     }
 }

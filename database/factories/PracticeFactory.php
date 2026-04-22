@@ -22,9 +22,9 @@ class PracticeFactory extends Factory
      */
     public function definition(): array
     {
-        $codes = once(fn () => Language::where('is_enabled', true)->pluck('code')->toArray());
+        $codes = Language::enabled()->pluck('code')->all();
 
-        if (empty($codes)) {
+        if ($codes === []) {
             $codes = ['en'];
         }
 
@@ -38,13 +38,13 @@ class PracticeFactory extends Factory
 
         return [
             'day' => $this->faker->numberBetween(1, 29),
-            'focus_problem_id' => FocusProblem::inRandomOrder()->first()?->id ?? FocusProblem::factory(),
-            'experience_level_id' => ExperienceLevel::inRandomOrder()->first()?->id ?? ExperienceLevel::factory(),
-            'module_choice_id' => ModuleChoice::inRandomOrder()->first()?->id ?? ModuleChoice::factory(),
-            'meditation_type_id' => MeditationType::inRandomOrder()->first()?->id ?? MeditationType::factory(),
+            'focus_problem_id' => FocusProblem::query()->inRandomOrder()->value('id') ?? FocusProblem::factory(),
+            'experience_level_id' => ExperienceLevel::query()->inRandomOrder()->value('id') ?? ExperienceLevel::factory(),
+            'module_choice_id' => ModuleChoice::query()->inRandomOrder()->value('id') ?? ModuleChoice::factory(),
+            'meditation_type_id' => MeditationType::query()->inRandomOrder()->value('id') ?? MeditationType::factory(),
             'duration' => $this->faker->numberBetween(60, 1800),
-            'image_url' => $this->faker->imageUrl(),
-            'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'image_path' => null,
+            'video_path' => null,
             'is_active' => $this->faker->boolean(90),
             'title' => $title,
             'description' => $description,

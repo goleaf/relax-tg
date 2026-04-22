@@ -27,7 +27,7 @@ class LanguageTabsBuilder
      */
     public static function make(callable $fieldFactory): Tabs
     {
-        $languages = Language::where('is_enabled', true)
+        $languages = Language::enabled()
             ->orderBy('name', 'asc')
             ->get();
 

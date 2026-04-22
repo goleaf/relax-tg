@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
             // Dynamically load enabled languages from the database.
             // Falls back to ['en'] if the table doesn't exist yet (e.g. fresh install).
             $locales = Schema::hasTable('languages')
-                ? Language::where('is_enabled', true)->pluck('code')->toArray()
+                ? Language::enabled()->pluck('code')->toArray()
                 : ['en'];
 
             $switch->locales($locales);

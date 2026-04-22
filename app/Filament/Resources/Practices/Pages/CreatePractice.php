@@ -11,17 +11,19 @@ class CreatePractice extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $queryParams = [
+        $filterFields = [
             'day',
-            'focus_problem',
-            'experience_level',
-            'module_choice',
-            'meditation_type',
+            'focus_problem_id',
+            'experience_level_id',
+            'module_choice_id',
+            'meditation_type_id',
         ];
 
-        foreach ($queryParams as $param) {
-            if ($value = request()->query($param)) {
-                $data[$param] = $value;
+        foreach ($filterFields as $field) {
+            $value = data_get(request()->query('filters', []), "{$field}.value");
+
+            if (filled($value)) {
+                $data[$field] = $value;
             }
         }
 
@@ -30,12 +32,19 @@ class CreatePractice extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index', [
+        $filters = collect([
             'day' => $this->record->day,
-            'focus_problem' => $this->record->focus_problem->value ?? $this->record->focus_problem,
-            'experience_level' => $this->record->experience_level->value ?? $this->record->experience_level,
-            'module_choice' => $this->record->module_choice->value ?? $this->record->module_choice,
-            'meditation_type' => $this->record->meditation_type->value ?? $this->record->meditation_type,
+            'focus_problem_id' => $this->record->focus_problem_id,
+            'experience_level_id' => $this->record->experience_level_id,
+            'module_choice_id' => $this->record->module_choice_id,
+            'meditation_type_id' => $this->record->meditation_type_id,
+        ])
+            ->filter(fn (?int $value): bool => filled($value))
+            ->map(fn (int $value): array => ['value' => $value])
+            ->all();
+
+        return $this->getResource()::getUrl('index', [
+            'filters' => $filters,
         ]);
     }
 }
