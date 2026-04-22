@@ -157,12 +157,21 @@ This project has domain-specific skills available. You MUST activate the relevan
 - If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
 - Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
 
+## Language Module Architecture
+
+- The Language module is purely based on a pre-seeded table of all world languages.
+- AI must NOT add forms, create, edit, or delete actions to the Language resource.
+- The `LanguagesTable` must NOT include `created_at` or `updated_at` columns, and must NOT allow sorting on any columns except where explicitly necessary (e.g., sortable name is disabled).
+- Languages are managed purely by toggling the `is_enabled` switch.
+
 === pest/core rules ===
 
 ## Pest
 
 - This project uses Pest for testing. Create tests: `php artisan make:test --pest {name}`.
-- Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
+- Run tests: `vendor/bin/pest` directly to avoid TTY process errors, or use `php artisan test --compact`.
 - Do NOT delete tests without approval.
+- Always place database-related tests (Models, Filament Resources) in the `tests/Feature` directory, not `Unit`.
+- For testing Filament list pages with tabs, use `Livewire::test(Page::class)->set('activeTab', 'tab-name')` instead of `->filterTable()`.
 
 </laravel-boost-guidelines>
