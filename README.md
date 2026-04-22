@@ -1,64 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Relax TG
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Relax TG is a Laravel + Filament admin used to manage a multilingual meditation practice program and expose the same content to Telegram clients through a secured internal API and webhook-driven bot flow.
 
-## About Laravel
+## Project Layout
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- `laravel/` — Laravel application
+- `laravel/app/Filament` — Filament admin resources, pages, widgets, and table/form schemas
+- `laravel/app/Http/Controllers/Api/Telegram` — Telegram webhook and internal API endpoints
+- `laravel/app/Actions/Telegram` — Telegram command handling
+- `laravel/app/Services/Telegram` — Telegram SDK integration
+- `laravel/lang` — application translations
+- `.mcp.json` — MCP servers used in this repo
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 13
+- Filament 5
+- Livewire 4
+- Pest 4
+- Tailwind CSS 4
+- Telegram Bot SDK
+- Laravel Boost MCP
 
-## Learning Laravel
+## Admin Surface
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The top navigation is ordered as:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Dashboard
+2. Practices
+3. Categories
+4. Languages
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+The admin currently manages:
 
-## Agentic Development
+- practices with day, duration, status, image/video media, and multilingual title/description fields
+- category taxonomies for focus problems, experience levels, module choices, and meditation types
+- enabled content languages
+- dashboard widgets for practice coverage, daily volume, average session length, and focus-problem distribution
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Localization
+
+Filament interface locales:
+
+- `de`
+- `en`
+- `es`
+- `fr`
+- `it`
+- `lt`
+- `pl`
+- `ru`
+- `uk`
+
+Application translation files exist for:
+
+- `admin.php`
+- `enums.php`
+- `telegram.php`
+
+Filament core package translations come from the installed vendor packages, while project-specific labels and Telegram copy live in `laravel/lang/*`.
+
+## Telegram Integration
+
+Telegram support is already wired into the project:
+
+- MCP server wrapper: `laravel/bin/mcp-telegram`
+- MCP registration: `.mcp.json`
+- webhook endpoint: `POST /api/telegram/webhook`
+- protected internal API:
+  - `GET /api/telegram/practices`
+  - `GET /api/telegram/practices/{practice}`
+- webhook sync command:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd laravel
+php artisan telegram:webhook:sync --no-interaction
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Required environment values:
 
-## Contributing
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_WEBHOOK_URL`
+- `TELEGRAM_WEBHOOK_SECRET`
+- `TELEGRAM_INTERNAL_API_TOKEN`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Query And Data Notes
 
-## Code of Conduct
+- practice tables and filters are backed by Eloquent scopes
+- practice list filtering is eager-loaded and count-aware in Filament
+- Telegram practice delivery uses simple pagination to avoid unnecessary total-count queries
+- Telegram list/detail queries share a model scope that selects the API payload columns and eager-loads taxonomy titles
+- dashboard aggregates were moved from collection-side grouping into database queries
+- migrations add composite indexes for high-traffic practice filters and enabled language tabs
+- legacy media URL columns are removed in favor of stored media paths
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Development Commands
 
-## Security Vulnerabilities
+```bash
+cd laravel
+composer install
+npm install
+php artisan migrate
+php artisan test --compact
+vendor/bin/pint --dirty --format agent
+npm run build
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Repo Skills
 
-## License
+The repo includes local agent skills under `laravel/.agents/skills`, including:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `laravel-best-practices`
+- `pest-testing`
+- `tailwindcss-development`
+- `telegram-api-development`
 
-## Project Features
+## Current Focus Areas
 
-- Multilingual Support
-- Filament Admin Panel for managing Entities
-- Meditation Practices module (CRUD with multi-language fields)
+- Filament-first content management
+- multilingual admin and Telegram delivery
+- predictable Eloquent query patterns with eager loading
+- test-backed Telegram webhook and internal API behavior

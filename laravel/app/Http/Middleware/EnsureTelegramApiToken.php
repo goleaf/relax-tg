@@ -19,7 +19,7 @@ class EnsureTelegramApiToken
 
         if ($configuredToken === '') {
             return response()->json([
-                'message' => 'Telegram API token is not configured.',
+                'message' => __('telegram.api.token_not_configured'),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
@@ -27,7 +27,7 @@ class EnsureTelegramApiToken
 
         if (($providedToken === '') || (! hash_equals($configuredToken, $providedToken))) {
             return response()->json([
-                'message' => 'Unauthorized.',
+                'message' => __('http-statuses.401'),
             ], Response::HTTP_UNAUTHORIZED);
         }
 

@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -23,7 +24,7 @@ class MeditationTypeResource extends Resource
 {
     protected static ?string $model = MeditationType::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
     public static function getModelLabel(): string
     {
@@ -59,11 +60,13 @@ class MeditationTypeResource extends Resource
         return $schema
             ->components([
                 Section::make(__('admin.resources.meditation_types.sections.translations'))
+                    ->icon(Heroicon::OutlinedLanguage)
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label(__('admin.resources.meditation_types.fields.title'))
+                                    ->prefixIcon(Heroicon::OutlinedSparkles)
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -79,6 +82,8 @@ class MeditationTypeResource extends Resource
             ->columns([
                 TextColumn::make(MeditationType::titleAttribute())
                     ->label(__('admin.resources.meditation_types.fields.title'))
+                    ->icon(Heroicon::OutlinedSparkles)
+                    ->iconColor('primary')
                     ->searchable()
                     ->sortable(),
             ])

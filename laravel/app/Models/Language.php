@@ -13,6 +13,11 @@ class Language extends Model
     /** @use HasFactory<LanguageFactory> */
     use HasFactory;
 
+    /**
+     * @var array<int, string>
+     */
+    private const SUPPORTED_INTERFACE_LOCALES = ['de', 'en', 'es', 'fr', 'it', 'lt', 'pl', 'ru', 'uk'];
+
     protected $fillable = [
         'code',
         'name',
@@ -27,6 +32,34 @@ class Language extends Model
     public function scopeEnabled(Builder $query): Builder
     {
         return $query->where('is_enabled', true);
+    }
+
+    public function scopeForFilamentIndex(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'code',
+            'name',
+            'native_name',
+            'is_enabled',
+        ]);
+    }
+
+    public function scopeForEnabledContentTabs(Builder $query): Builder
+    {
+        return $query
+            ->forFilamentIndex()
+            ->enabled()
+            ->orderBy('name')
+            ->orderBy('code');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function supportedInterfaceLocales(): array
+    {
+        return self::SUPPORTED_INTERFACE_LOCALES;
     }
 
     public static function nativeName(string $code, ?string $fallback = null): string
@@ -47,5 +80,10 @@ class Language extends Model
         }
 
         return config("languages.{$code}", Str::upper($code));
+    }
+
+    public function flagIcon(): string
+    {
+        return 'flag-language-'.Str::lower($this->code);
     }
 }

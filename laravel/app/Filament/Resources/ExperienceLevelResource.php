@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -23,7 +24,7 @@ class ExperienceLevelResource extends Resource
 {
     protected static ?string $model = ExperienceLevel::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
     public static function getModelLabel(): string
     {
@@ -59,11 +60,13 @@ class ExperienceLevelResource extends Resource
         return $schema
             ->components([
                 Section::make(__('admin.resources.experience_levels.sections.translations'))
+                    ->icon(Heroicon::OutlinedLanguage)
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label(__('admin.resources.experience_levels.fields.title'))
+                                    ->prefixIcon(Heroicon::OutlinedChartBar)
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -79,6 +82,8 @@ class ExperienceLevelResource extends Resource
             ->columns([
                 TextColumn::make(ExperienceLevel::titleAttribute())
                     ->label(__('admin.resources.experience_levels.fields.title'))
+                    ->icon(Heroicon::OutlinedChartBar)
+                    ->iconColor('info')
                     ->searchable()
                     ->sortable(),
             ])

@@ -20,7 +20,7 @@ test('telegram webhook rejects requests with an invalid secret token', function 
     $this->postJson('/api/telegram/webhook', [])
         ->assertForbidden()
         ->assertJson([
-            'message' => 'Forbidden.',
+            'message' => __('http-statuses.403'),
         ]);
 });
 
@@ -43,6 +43,7 @@ test('telegram webhook answers day commands using practice data', function () {
     Practice::factory()->create([
         'day' => 3,
         'duration' => 600,
+        'is_active' => true,
         'focus_problem_id' => $focusProblem->id,
         'experience_level_id' => $experienceLevel->id,
         'module_choice_id' => $moduleChoice->id,
@@ -70,6 +71,40 @@ test('telegram webhook answers day commands using practice data', function () {
                 && str_contains($text, 'Активные практики для дня 3')
                 && str_contains($text, 'Перезагрузка дыхания')
                 && str_contains($text, 'Длительность: 10:00');
+        });
+
+    $this->app->instance(TelegramBotService::class, $service);
+
+    $this->withHeader('X-Telegram-Bot-Api-Secret-Token', 'expected-secret')
+        ->postJson('/api/telegram/webhook', [])
+        ->assertSuccessful()
+        ->assertJson([
+            'ok' => true,
+        ]);
+});
+
+test('telegram webhook localizes help messages for supported non-russian locales', function () {
+    config()->set('services.telegram.webhook_secret', 'expected-secret');
+
+    $service = Mockery::mock(TelegramBotService::class);
+    $service->shouldReceive('getWebhookUpdate')
+        ->once()
+        ->andReturn(new UpdateObject([
+            'update_id' => 2,
+            'message' => [
+                'message_id' => 8,
+                'date' => now()->timestamp,
+                'chat' => ['id' => 987654321, 'type' => 'private'],
+                'from' => ['id' => 2, 'is_bot' => false, 'first_name' => 'Jonas', 'language_code' => 'lt'],
+                'text' => '/help',
+            ],
+        ]));
+    $service->shouldReceive('sendMessage')
+        ->once()
+        ->withArgs(function (int $chatId, string $text): bool {
+            return ($chatId === 987654321)
+                && str_contains($text, 'Galimos komandos')
+                && str_contains($text, '/day {number}');
         });
 
     $this->app->instance(TelegramBotService::class, $service);

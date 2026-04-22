@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -23,7 +24,7 @@ class ModuleChoiceResource extends Resource
 {
     protected static ?string $model = ModuleChoice::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
     public static function getModelLabel(): string
     {
@@ -59,11 +60,13 @@ class ModuleChoiceResource extends Resource
         return $schema
             ->components([
                 Section::make(__('admin.resources.module_choices.sections.translations'))
+                    ->icon(Heroicon::OutlinedLanguage)
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label(__('admin.resources.module_choices.fields.title'))
+                                    ->prefixIcon(Heroicon::OutlinedSquares2x2)
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -79,6 +82,8 @@ class ModuleChoiceResource extends Resource
             ->columns([
                 TextColumn::make(ModuleChoice::titleAttribute())
                     ->label(__('admin.resources.module_choices.fields.title'))
+                    ->icon(Heroicon::OutlinedSquares2x2)
+                    ->iconColor('success')
                     ->searchable()
                     ->sortable(),
             ])

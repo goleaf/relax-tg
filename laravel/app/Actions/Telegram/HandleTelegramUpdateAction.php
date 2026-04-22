@@ -2,6 +2,7 @@
 
 namespace App\Actions\Telegram;
 
+use App\Models\Language;
 use App\Models\Practice;
 use App\Services\Telegram\TelegramBotService;
 use Illuminate\Support\Str;
@@ -66,7 +67,7 @@ class HandleTelegramUpdateAction
     {
         $locale = Str::before($languageCode, '-');
 
-        return in_array($locale, ['en', 'ru'], true) ? $locale : 'en';
+        return in_array($locale, Language::supportedInterfaceLocales(), true) ? $locale : 'en';
     }
 
     private function replyWithDayOverview(int|string $chatId, int $day, string $locale): void
@@ -78,11 +79,7 @@ class HandleTelegramUpdateAction
         }
 
         $practices = Practice::query()
-            ->active()
-            ->forDay($day)
-            ->selectResourceColumns()
-            ->withTaxonomyTitles()
-            ->orderedForProgram()
+            ->forTelegramDelivery(['day' => $day])
             ->get();
 
         if ($practices->isEmpty()) {
@@ -105,9 +102,7 @@ class HandleTelegramUpdateAction
     private function replyWithPracticeDetails(int|string $chatId, int $practiceId, string $locale): void
     {
         $practice = Practice::query()
-            ->active()
-            ->selectResourceColumns()
-            ->withTaxonomyTitles()
+            ->forTelegramDelivery()
             ->find($practiceId);
 
         if ($practice === null) {

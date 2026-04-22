@@ -157,7 +157,7 @@ test('it can aggregate navigation counts by day', function () {
     Practice::factory()->create(['day' => 3]);
 
     $counts = Practice::query()
-        ->selectNavigationCounts()
+        ->selectDayCounts()
         ->pluck('total', 'day');
 
     expect((int) $counts[1])->toBe(2)

@@ -8,6 +8,9 @@ return [
     'day_empty' => 'No active practices were found for day :day.',
     'day_intro' => 'Active practices for day :day:',
     'practice_missing' => 'Practice #:id was not found.',
+    'api' => [
+        'token_not_configured' => 'Telegram API token is not configured.',
+    ],
     'labels' => [
         'day' => 'Day: :value',
         'duration' => 'Duration: :value',

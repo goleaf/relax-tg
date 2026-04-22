@@ -15,7 +15,7 @@ use Filament\Schemas\Components\Tabs;
  *       ];
  *   })
  *
- * The builder queries Language::where('is_enabled', true) automatically.
+ * The builder queries enabled languages automatically.
  * Tabs are sorted ASC by the language name.
  */
 class LanguageTabsBuilder
@@ -27,8 +27,8 @@ class LanguageTabsBuilder
      */
     public static function make(callable $fieldFactory): Tabs
     {
-        $languages = Language::enabled()
-            ->orderBy('name', 'asc')
+        $languages = Language::query()
+            ->forEnabledContentTabs()
             ->get();
 
         $tabs = $languages->map(function (Language $language) use ($fieldFactory) {
@@ -37,7 +37,7 @@ class LanguageTabsBuilder
                 ->schema($fieldFactory($language));
         })->toArray();
 
-        return Tabs::make('Languages')
+        return Tabs::make(__('admin.resources.languages.navigation'))
             ->tabs($tabs)
             ->columnSpanFull();
     }

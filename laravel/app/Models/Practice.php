@@ -315,7 +315,30 @@ class Practice extends Model
             ->withTaxonomyTitles();
     }
 
-    public function scopeSelectNavigationCounts(Builder $query): Builder
+    /**
+     * @param  array{
+     *     day?: int|string|null,
+     *     focus_problem_id?: int|string|null,
+     *     experience_level_id?: int|string|null,
+     *     module_choice_id?: int|string|null,
+     *     meditation_type_id?: int|string|null
+     * }  $filters
+     */
+    public function scopeForTelegramDelivery(Builder $query, array $filters = [], bool $activeOnly = true): Builder
+    {
+        return $query
+            ->selectResourceColumns()
+            ->withTaxonomyTitles()
+            ->when($activeOnly, fn (Builder $query): Builder => $query->active())
+            ->forDay(isset($filters['day']) ? (int) $filters['day'] : null)
+            ->forFocusProblem(isset($filters['focus_problem_id']) ? (int) $filters['focus_problem_id'] : null)
+            ->forExperienceLevel(isset($filters['experience_level_id']) ? (int) $filters['experience_level_id'] : null)
+            ->forModuleChoice(isset($filters['module_choice_id']) ? (int) $filters['module_choice_id'] : null)
+            ->forMeditationType(isset($filters['meditation_type_id']) ? (int) $filters['meditation_type_id'] : null)
+            ->orderedForProgram();
+    }
+
+    public function scopeSelectDayCounts(Builder $query): Builder
     {
         return $query
             ->select('day')
@@ -323,14 +346,66 @@ class Practice extends Model
             ->groupBy('day');
     }
 
+    public function scopeSelectAverageDurationMinutesByDay(Builder $query): Builder
+    {
+        return $query
+            ->select('day')
+            ->selectRaw('round(avg(duration) / 60.0, 1) as average_minutes')
+            ->groupBy('day');
+    }
+
+    public function scopeSelectMediaReadyCountsByDay(Builder $query): Builder
+    {
+        return $query
+            ->select('day')
+            ->whereNotNull('image_path')
+            ->whereNotNull('video_path')
+            ->selectRaw('count(*) as total')
+            ->groupBy('day');
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public static function dayCounts(): array
+    {
+        return once(fn (): array => static::query()
+            ->selectDayCounts()
+            ->pluck('total', 'day')
+            ->mapWithKeys(fn (mixed $count, mixed $day): array => [(int) $day => (int) $count])
+            ->all());
+    }
+
+    /**
+     * @return array<int, float>
+     */
+    public static function averageDurationMinutesByDay(): array
+    {
+        return once(fn (): array => static::query()
+            ->selectAverageDurationMinutesByDay()
+            ->pluck('average_minutes', 'day')
+            ->mapWithKeys(fn (mixed $average, mixed $day): array => [(int) $day => (float) $average])
+            ->all());
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public static function mediaReadyCountsByDay(): array
+    {
+        return once(fn (): array => static::query()
+            ->selectMediaReadyCountsByDay()
+            ->pluck('total', 'day')
+            ->mapWithKeys(fn (mixed $count, mixed $day): array => [(int) $day => (int) $count])
+            ->all());
+    }
+
     /**
      * @return array<int, array{day: int, count: int}>
      */
     public static function getNavigationTree(): array
     {
-        $counts = static::query()
-            ->selectNavigationCounts()
-            ->pluck('total', 'day');
+        $counts = static::dayCounts();
 
         return collect(range(1, self::DAY_TOTAL))
             ->map(function (int $day) use ($counts): array {
@@ -390,22 +465,11 @@ class Practice extends Model
         int|string|null $value,
         string $locale,
     ): ?string {
-        $filter = self::RELATION_FILTERS[$field] ?? null;
-
-        if (($filter === null) || blank($value)) {
+        if (blank($value)) {
             return null;
         }
 
-        /** @var FocusProblem|ExperienceLevel|ModuleChoice|MeditationType|null $record */
-        $record = $filter['model']::query()
-            ->forFilamentOptions()
-            ->find($value);
-
-        if ($record === null) {
-            return null;
-        }
-
-        return $record->getTitle($locale);
+        return static::relationFilterTitles($field, $locale)[(int) $value] ?? null;
     }
 
     public static function relationFilterLabel(string $field): string
@@ -417,6 +481,37 @@ class Practice extends Model
         }
 
         return __("admin.resources.practices.short_labels.{$filter['label_key']}");
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function relationFilterTitles(string $field, string $locale): array
+    {
+        static $titles = [];
+
+        $cacheKey = "{$field}:{$locale}";
+
+        if (array_key_exists($cacheKey, $titles)) {
+            return $titles[$cacheKey];
+        }
+
+        $filter = self::RELATION_FILTERS[$field] ?? null;
+
+        if ($filter === null) {
+            return $titles[$cacheKey] = [];
+        }
+
+        /** @var class-string<FocusProblem|ExperienceLevel|ModuleChoice|MeditationType> $modelClass */
+        $modelClass = $filter['model'];
+
+        return $titles[$cacheKey] = $modelClass::query()
+            ->forFilamentOptions()
+            ->get()
+            ->mapWithKeys(fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): array => [
+                $record->getKey() => $record->getTitle($locale),
+            ])
+            ->all();
     }
 
     private function captureMediaPathsPendingDeletion(): void

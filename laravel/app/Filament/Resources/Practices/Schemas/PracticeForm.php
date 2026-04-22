@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,24 +28,28 @@ class PracticeForm
                 field: 'focus_problem_id',
                 label: __('admin.resources.practices.fields.focus_problem'),
                 relationship: 'focusProblem',
+                icon: Heroicon::OutlinedBolt,
                 hidden: in_array('focus_problem_id', $hiddenFields, true),
             ),
             static::taxonomySelect(
                 field: 'experience_level_id',
                 label: __('admin.resources.practices.fields.experience_level'),
                 relationship: 'experienceLevel',
+                icon: Heroicon::OutlinedChartBar,
                 hidden: in_array('experience_level_id', $hiddenFields, true),
             ),
             static::taxonomySelect(
                 field: 'module_choice_id',
                 label: __('admin.resources.practices.fields.module_choice'),
                 relationship: 'moduleChoice',
+                icon: Heroicon::OutlinedSquares2x2,
                 hidden: in_array('module_choice_id', $hiddenFields, true),
             ),
             static::taxonomySelect(
                 field: 'meditation_type_id',
                 label: __('admin.resources.practices.fields.meditation_type'),
                 relationship: 'meditationType',
+                icon: Heroicon::OutlinedSparkles,
                 hidden: in_array('meditation_type_id', $hiddenFields, true),
             ),
         ], fn (mixed $component): bool => $component !== null));
@@ -52,22 +57,32 @@ class PracticeForm
         return $schema
             ->components([
                 Section::make(__('admin.resources.practices.sections.general_and_categorization'))
+                    ->icon(Heroicon::OutlinedRectangleGroup)
                     ->schema([
                         Select::make('day')
                             ->label(__('admin.resources.practices.fields.day'))
+                            ->prefixIcon(Heroicon::OutlinedCalendarDays)
                             ->options(fn (): array => Practice::dayOptionsWithCounts())
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->optionsLimit(29)
                             ->required()
                             ->default(fn () => data_get(request()->query('filters', []), 'day.value')),
                         Toggle::make('is_active')
                             ->label(__('admin.resources.practices.fields.is_active'))
+                            ->onIcon(Heroicon::OutlinedCheckCircle)
+                            ->offIcon(Heroicon::OutlinedXCircle)
                             ->default(true),
                         ...$categorizationFields,
                     ])->columns(2),
 
                 Section::make(__('admin.resources.practices.sections.media'))
+                    ->icon(Heroicon::OutlinedPhoto)
                     ->schema([
                         TextInput::make('duration')
                             ->label(__('admin.resources.practices.fields.duration'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -77,11 +92,13 @@ class PracticeForm
                     ])->columns(1),
 
                 Section::make(__('admin.resources.practices.sections.translations'))
+                    ->icon(Heroicon::OutlinedLanguage)
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label(__('admin.resources.practices.fields.title'))
+                                    ->prefixIcon(Heroicon::OutlinedChatBubbleBottomCenterText)
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpanFull(),
@@ -100,6 +117,7 @@ class PracticeForm
         string $field,
         string $label,
         string $relationship,
+        Heroicon $icon,
         bool $hidden = false,
     ): ?Select {
         if ($hidden) {
@@ -108,6 +126,7 @@ class PracticeForm
 
         return Select::make($field)
             ->label($label)
+            ->prefixIcon($icon)
             ->relationship(
                 $relationship,
                 'id',
@@ -121,6 +140,7 @@ class PracticeForm
                     (int) $record->practices_count,
                 ),
             )
+            ->native(false)
             ->searchable()
             ->preload()
             ->required()

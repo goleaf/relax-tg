@@ -1,7 +1,11 @@
 <?php
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\ExperienceLevelResource;
+use App\Filament\Resources\FocusProblemResource;
 use App\Filament\Resources\Languages\LanguageResource;
+use App\Filament\Resources\MeditationTypeResource;
+use App\Filament\Resources\ModuleChoiceResource;
 use App\Filament\Resources\Practices\PracticeResource;
 use App\Filament\Widgets\FocusProblemDistributionChart;
 use App\Filament\Widgets\PracticeDurationChart;
@@ -14,6 +18,7 @@ use App\Models\MeditationType;
 use App\Models\ModuleChoice;
 use App\Models\Practice;
 use App\Models\User;
+use Filament\Support\Icons\Heroicon;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -51,26 +56,45 @@ test('dashboard renders custom widgets and removes the default dashboard cards',
 });
 
 test('dashboard, practices, categories, and languages are rendered in the plugin top navigation order', function () {
-    $this->get('/')
+    $response = $this->get('/');
+
+    $response
         ->assertSuccessful()
         ->assertDontSee('data-test-topbar-primary-navigation', false)
         ->assertSee('class="fi-topbar-nav-groups"', false)
         ->assertSee('data-test-topbar-link="dashboard"', false)
         ->assertSee('data-test-topbar-link="practices"', false)
         ->assertSee('data-test-topbar-link="categories"', false)
+        ->assertSee('data-topbar-trigger-icon="o-folder"', false)
         ->assertSee('data-test-topbar-link="languages"', false)
+        ->assertSeeText(__('filament-panels::layout.actions.logout.label'))
         ->assertSeeText('Dashboard')
         ->assertSeeText('Practices')
         ->assertSeeText('Categories')
-        ->assertSeeText('Languages');
+        ->assertSeeText('Languages')
+        ->assertDontSee('fi-user-menu-trigger', false);
 
-    $topNavigationLabels = collect(filament()->getCurrentOrDefaultPanel()->buildNavigation())
+    $navigation = filament()->getCurrentOrDefaultPanel()->buildNavigation();
+
+    $topNavigationLabels = collect($navigation)
         ->flatMap(fn ($group): array => filled($group->getLabel())
             ? [$group->getLabel()]
             : collect($group->getItems())
                 ->map(fn ($item): string => $item->getLabel())
                 ->all())
         ->values()
+        ->all();
+
+    $categoriesGroup = collect($navigation)
+        ->first(fn ($group): bool => $group->getLabel() === 'Categories');
+
+    $categoryNavigationLabels = collect($categoriesGroup?->getItems() ?? [])
+        ->map(fn ($item): string => $item->getLabel())
+        ->values()
+        ->all();
+
+    $categoryNavigationIcons = collect($categoriesGroup?->getItems() ?? [])
+        ->mapWithKeys(fn ($item): array => [$item->getLabel() => $item->getIcon()])
         ->all();
 
     expect(Dashboard::shouldRegisterNavigation())->toBeTrue()
@@ -80,6 +104,20 @@ test('dashboard, practices, categories, and languages are rendered in the plugin
             'Practices',
             'Categories',
             'Languages',
+        ])
+        ->and($categoriesGroup)->not->toBeNull()
+        ->and($categoriesGroup?->getIcon())->toBeNull()
+        ->and($categoryNavigationLabels)->toBe([
+            FocusProblemResource::getNavigationLabel(),
+            ExperienceLevelResource::getNavigationLabel(),
+            ModuleChoiceResource::getNavigationLabel(),
+            MeditationTypeResource::getNavigationLabel(),
+        ])
+        ->and($categoryNavigationIcons)->toBe([
+            FocusProblemResource::getNavigationLabel() => Heroicon::OutlinedTag,
+            ExperienceLevelResource::getNavigationLabel() => Heroicon::OutlinedChartBar,
+            ModuleChoiceResource::getNavigationLabel() => Heroicon::OutlinedSquares2x2,
+            MeditationTypeResource::getNavigationLabel() => Heroicon::OutlinedSparkles,
         ])
         ->and(LanguageResource::shouldRegisterNavigation())->toBeTrue();
 });

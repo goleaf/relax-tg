@@ -44,7 +44,8 @@ abstract class BasePracticesRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        $count = $ownerRecord->practices()->count();
+        $count = $ownerRecord->practices_count
+            ?? $ownerRecord->loadCount('practices')->practices_count;
 
         return (string) $count;
     }

@@ -9,6 +9,7 @@ use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
@@ -35,17 +36,23 @@ class PracticesTable
             ->columns([
                 TextColumn::make('day')
                     ->label(__('admin.resources.practices.fields.day'))
+                    ->icon(Heroicon::OutlinedCalendarDays)
+                    ->iconColor('primary')
                     ->sortable()
                     ->formatStateUsing(fn (int $state): string => Practice::formatDay($state))
                     ->width('100px'),
                 TextColumn::make(Practice::translatedAttribute('title'))
                     ->label(__('admin.resources.practices.fields.title'))
+                    ->icon(Heroicon::OutlinedChatBubbleBottomCenterText)
+                    ->iconColor('primary')
                     ->searchable()
                     ->sortable()
                     ->limit(50)
                     ->width('250px'),
                 TextColumn::make(Practice::translatedAttribute('description'))
                     ->label(__('admin.resources.practices.fields.description'))
+                    ->icon(Heroicon::OutlinedDocumentText)
+                    ->iconColor('gray')
                     ->hidden()
                     ->limit(80)
                     ->wrap()
@@ -53,35 +60,49 @@ class PracticesTable
                 TextColumn::make('focusProblem.'.FocusProblem::titleAttribute())
                     ->label(__('admin.resources.practices.fields.focus_problem'))
                     ->hidden(in_array('focus_problem_id', $hiddenColumns, true))
+                    ->icon(Heroicon::OutlinedBolt)
+                    ->iconColor('warning')
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('experienceLevel.'.ExperienceLevel::titleAttribute())
                     ->label(__('admin.resources.practices.short_labels.experience_level'))
                     ->hidden(in_array('experience_level_id', $hiddenColumns, true))
+                    ->icon(Heroicon::OutlinedChartBar)
+                    ->iconColor('info')
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('moduleChoice.'.ModuleChoice::titleAttribute())
                     ->label(__('admin.resources.practices.short_labels.module_choice'))
                     ->hidden(in_array('module_choice_id', $hiddenColumns, true))
+                    ->icon(Heroicon::OutlinedSquares2x2)
+                    ->iconColor('success')
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('meditationType.'.MeditationType::titleAttribute())
                     ->label(__('admin.resources.practices.short_labels.meditation_type'))
                     ->hidden(in_array('meditation_type_id', $hiddenColumns, true))
+                    ->icon(Heroicon::OutlinedSparkles)
+                    ->iconColor('primary')
                     ->badge()
                     ->sortable()
                     ->width('120px'),
                 TextColumn::make('duration')
                     ->label(__('admin.resources.practices.fields.duration'))
+                    ->icon(Heroicon::OutlinedClock)
+                    ->iconColor('gray')
                     ->formatStateUsing(fn (int $state): string => Practice::formatDuration($state))
                     ->sortable()
                     ->width('100px'),
                 IconColumn::make('is_active')
                     ->label(__('admin.resources.practices.fields.is_active'))
                     ->boolean()
+                    ->trueIcon(Heroicon::OutlinedCheckCircle)
+                    ->falseIcon(Heroicon::OutlinedXCircle)
+                    ->trueColor('success')
+                    ->falseColor('gray')
                     ->sortable()
                     ->width('80px'),
             ])
@@ -138,6 +159,10 @@ class PracticesTable
 
         return SelectFilter::make('day')
             ->label(__('admin.resources.practices.fields.day'))
+            ->native(false)
+            ->searchable()
+            ->preload()
+            ->optionsLimit(29)
             ->indicateUsing(fn (array $state): ?string => static::dayFilterIndicator($state))
             ->options(fn (HasTable $livewire): array => static::dayOptionsWithCounts(
                 static::tableFilters($livewire),
@@ -156,6 +181,7 @@ class PracticesTable
 
         return SelectFilter::make($field)
             ->label($label)
+            ->native(false)
             ->relationship(
                 $relationship,
                 'id',
@@ -211,12 +237,12 @@ class PracticesTable
     private static function dayOptionsWithCounts(array $filters): array
     {
         $counts = static::applyPracticeFilters(
-            Practice::query()->select(['day']),
+            Practice::query(),
             $filters,
             excludedField: 'day',
         )
-            ->pluck('day')
-            ->countBy();
+            ->selectDayCounts()
+            ->pluck('total', 'day');
 
         return collect(Practice::dayOptions())
             ->mapWithKeys(fn (string $label, int $day): array => [

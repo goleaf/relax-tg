@@ -10,6 +10,7 @@ use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class LanguageResource extends Resource
@@ -50,6 +51,12 @@ class LanguageResource extends Resource
     public static function table(Table $table): Table
     {
         return LanguagesTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->forFilamentIndex();
     }
 
     public static function getRelations(): array

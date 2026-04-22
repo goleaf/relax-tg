@@ -21,7 +21,7 @@ class TelegramWebhookController extends Controller
         if (($configuredSecret !== '')
             && (! hash_equals($configuredSecret, (string) $request->header('X-Telegram-Bot-Api-Secret-Token')))) {
             return response()->json([
-                'message' => 'Forbidden.',
+                'message' => __('http-statuses.403'),
             ], Response::HTTP_FORBIDDEN);
         }
 

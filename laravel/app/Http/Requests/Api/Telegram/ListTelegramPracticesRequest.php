@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Api\Telegram;
 
+use App\Models\Language;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ListTelegramPracticesRequest extends FormRequest
 {
@@ -24,7 +26,7 @@ class ListTelegramPracticesRequest extends FormRequest
             'day' => ['nullable', 'integer', 'between:1,29'],
             'experience_level_id' => ['nullable', 'integer', 'exists:experience_levels,id'],
             'focus_problem_id' => ['nullable', 'integer', 'exists:focus_problems,id'],
-            'locale' => ['nullable', 'string', 'max:10'],
+            'locale' => ['nullable', 'string', 'max:10', Rule::in(Language::supportedInterfaceLocales())],
             'meditation_type_id' => ['nullable', 'integer', 'exists:meditation_types,id'],
             'module_choice_id' => ['nullable', 'integer', 'exists:module_choices,id'],
             'per_page' => ['nullable', 'integer', 'between:1,50'],

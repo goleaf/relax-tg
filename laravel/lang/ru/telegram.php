@@ -8,6 +8,9 @@ return [
     'day_empty' => 'Для дня :day не найдено активных практик.',
     'day_intro' => 'Активные практики для дня :day:',
     'practice_missing' => 'Практика #:id не найдена.',
+    'api' => [
+        'token_not_configured' => 'Токен API Telegram не настроен.',
+    ],
     'labels' => [
         'day' => 'День: :value',
         'duration' => 'Длительность: :value',

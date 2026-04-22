@@ -18,7 +18,17 @@ test('telegram practices api requires a valid bearer token', function () {
     $this->getJson('/api/telegram/practices')
         ->assertUnauthorized()
         ->assertJson([
-            'message' => 'Unauthorized.',
+            'message' => __('http-statuses.401'),
+        ]);
+});
+
+test('telegram practices api reports missing token configuration with a translated message', function () {
+    config()->set('services.telegram.internal_api_token', '');
+
+    $this->getJson('/api/telegram/practices')
+        ->assertStatus(503)
+        ->assertJson([
+            'message' => __('telegram.api.token_not_configured'),
         ]);
 });
 
@@ -71,6 +81,20 @@ test('telegram practices api returns localized practice data from filament manag
     expect($response->json('data'))->toHaveCount(1);
 });
 
+test('telegram practices api uses simple pagination metadata', function () {
+    Practice::factory()->count(2)->create([
+        'day' => 5,
+        'is_active' => true,
+    ]);
+
+    $this->withToken('telegram-api-token')
+        ->getJson('/api/telegram/practices?day=5&per_page=1')
+        ->assertSuccessful()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonMissingPath('meta.total')
+        ->assertJsonMissingPath('meta.last_page');
+});
+
 test('telegram practices show endpoint localizes a single practice', function () {
     $practice = Practice::factory()->create([
         'title' => ['en' => 'Evening reset', 'ru' => 'Вечерняя перезагрузка'],
@@ -83,4 +107,11 @@ test('telegram practices show endpoint localizes a single practice', function ()
         ->assertJsonPath('data.id', $practice->id)
         ->assertJsonPath('data.title', 'Вечерняя перезагрузка')
         ->assertJsonPath('data.description', 'Замедлитесь перед сном.');
+});
+
+test('telegram practices api rejects unsupported locales', function () {
+    $this->withToken('telegram-api-token')
+        ->getJson('/api/telegram/practices?locale=lv')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['locale']);
 });

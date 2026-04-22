@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -23,7 +24,7 @@ class FocusProblemResource extends Resource
 {
     protected static ?string $model = FocusProblem::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     public static function getModelLabel(): string
     {
@@ -59,11 +60,13 @@ class FocusProblemResource extends Resource
         return $schema
             ->components([
                 Section::make(__('admin.resources.focus_problems.sections.translations'))
+                    ->icon(Heroicon::OutlinedLanguage)
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
                                     ->label(__('admin.resources.focus_problems.fields.title'))
+                                    ->prefixIcon(Heroicon::OutlinedTag)
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -79,6 +82,8 @@ class FocusProblemResource extends Resource
             ->columns([
                 TextColumn::make(FocusProblem::titleAttribute())
                     ->label(__('admin.resources.focus_problems.fields.title'))
+                    ->icon(Heroicon::OutlinedTag)
+                    ->iconColor('warning')
                     ->searchable()
                     ->sortable(),
             ])

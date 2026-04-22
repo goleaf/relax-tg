@@ -17,19 +17,8 @@ class ListTelegramPracticesController extends Controller
         $request->attributes->set('telegram_locale', $locale);
 
         $practices = Practice::query()
-            ->selectResourceColumns()
-            ->withTaxonomyTitles()
-            ->when(
-                $request->boolean('active_only', true),
-                fn ($query) => $query->active(),
-            )
-            ->forDay(isset($validated['day']) ? (int) $validated['day'] : null)
-            ->forFocusProblem(isset($validated['focus_problem_id']) ? (int) $validated['focus_problem_id'] : null)
-            ->forExperienceLevel(isset($validated['experience_level_id']) ? (int) $validated['experience_level_id'] : null)
-            ->forModuleChoice(isset($validated['module_choice_id']) ? (int) $validated['module_choice_id'] : null)
-            ->forMeditationType(isset($validated['meditation_type_id']) ? (int) $validated['meditation_type_id'] : null)
-            ->orderedForProgram()
-            ->paginate(isset($validated['per_page']) ? (int) $validated['per_page'] : 15)
+            ->forTelegramDelivery($validated, $request->boolean('active_only', true))
+            ->simplePaginate(isset($validated['per_page']) ? (int) $validated['per_page'] : 15)
             ->withQueryString();
 
         return TelegramPracticeResource::collection($practices);

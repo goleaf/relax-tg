@@ -6,7 +6,6 @@ use App\Models\FocusProblem;
 use App\Models\Language;
 use App\Models\Practice;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection as SupportCollection;
 
 class PracticeDashboardData
 {
@@ -85,7 +84,6 @@ class PracticeDashboardData
     public function focusProblemDistribution(): array
     {
         return $this->focusProblemDistribution ??= $this->focusProblems()
-            ->loadCount('practices')
             ->map(function (FocusProblem $focusProblem): array {
                 return [
                     'label' => $focusProblem->getTitle(app()->getLocale()),
@@ -144,6 +142,7 @@ class PracticeDashboardData
     {
         return $this->focusProblems ??= FocusProblem::query()
             ->forFilamentOptions()
+            ->withCount('practices')
             ->get();
     }
 
@@ -152,11 +151,7 @@ class PracticeDashboardData
      */
     private function dayCounts(): array
     {
-        return $this->dayCounts ??= collect(Practice::getNavigationTree())
-            ->mapWithKeys(fn (array $dayData): array => [
-                (int) $dayData['day'] => (int) $dayData['count'],
-            ])
-            ->all();
+        return $this->dayCounts ??= Practice::dayCounts();
     }
 
     /**
@@ -164,17 +159,7 @@ class PracticeDashboardData
      */
     private function durationAveragesByDay(): array
     {
-        return $this->durationAveragesByDay ??= Practice::query()
-            ->toBase()
-            ->select([
-                'day',
-                'duration',
-            ])
-            ->get()
-            ->groupBy('day')
-            ->map(fn (SupportCollection $rows): float => round(((float) ($rows->avg('duration') ?? 0)) / 60, 1))
-            ->mapWithKeys(fn (float $average, mixed $day): array => [(int) $day => $average])
-            ->all();
+        return $this->durationAveragesByDay ??= Practice::averageDurationMinutesByDay();
     }
 
     /**
@@ -182,16 +167,7 @@ class PracticeDashboardData
      */
     private function mediaReadyCountsByDay(): array
     {
-        return $this->mediaReadyCountsByDay ??= Practice::query()
-            ->toBase()
-            ->select(['day'])
-            ->whereNotNull('image_path')
-            ->whereNotNull('video_path')
-            ->get()
-            ->pluck('day')
-            ->countBy()
-            ->mapWithKeys(fn (int $count, mixed $day): array => [(int) $day => $count])
-            ->all();
+        return $this->mediaReadyCountsByDay ??= Practice::mediaReadyCountsByDay();
     }
 
     /**

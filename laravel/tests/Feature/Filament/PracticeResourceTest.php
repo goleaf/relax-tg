@@ -28,7 +28,7 @@ beforeEach(function () {
 test('content translation fields remain driven by enabled languages independently from interface locales', function () {
     Language::query()->create(['code' => 'fr', 'name' => 'French', 'is_enabled' => true]);
 
-    expect(LanguageSwitch::make()->getLocales())->toBe(['en', 'ru']);
+    expect(LanguageSwitch::make()->getLocales())->toBe(Language::supportedInterfaceLocales());
 
     Livewire::test(CreatePractice::class)
         ->assertFormFieldExists('title.en')
@@ -77,15 +77,32 @@ test('practice list uses inline live filters and hides media and created columns
         ->assertTableColumnDoesNotExist('video_path')
         ->assertTableColumnDoesNotExist('created_at');
 
-    expect($component->instance()->getTable()->getFiltersLayout())->toBe(FiltersLayout::AboveContent)
-        ->and($component->instance()->getTable()->hasDeferredFilters())->toBeFalse()
-        ->and(array_keys($component->instance()->getTable()->getFilters()))->toBe([
+    $table = $component->instance()->getTable();
+
+    expect($table->getFiltersLayout())->toBe(FiltersLayout::AboveContent)
+        ->and($table->hasDeferredFilters())->toBeFalse()
+        ->and(array_keys($table->getFilters()))->toBe([
             'day',
             'focus_problem_id',
             'experience_level_id',
             'module_choice_id',
             'meditation_type_id',
-        ]);
+        ])
+        ->and($table->getFilter('day')->isNative())->toBeFalse()
+        ->and($table->getFilter('day')->getSearchable())->toBeTrue()
+        ->and($table->getFilter('day')->isPreloaded())->toBeTrue()
+        ->and($table->getFilter('focus_problem_id')->isNative())->toBeFalse()
+        ->and($table->getFilter('focus_problem_id')->getSearchable())->toBeTrue()
+        ->and($table->getFilter('focus_problem_id')->isPreloaded())->toBeTrue()
+        ->and($table->getFilter('experience_level_id')->isNative())->toBeFalse()
+        ->and($table->getFilter('experience_level_id')->getSearchable())->toBeTrue()
+        ->and($table->getFilter('experience_level_id')->isPreloaded())->toBeTrue()
+        ->and($table->getFilter('module_choice_id')->isNative())->toBeFalse()
+        ->and($table->getFilter('module_choice_id')->getSearchable())->toBeTrue()
+        ->and($table->getFilter('module_choice_id')->isPreloaded())->toBeTrue()
+        ->and($table->getFilter('meditation_type_id')->isNative())->toBeFalse()
+        ->and($table->getFilter('meditation_type_id')->getSearchable())->toBeTrue()
+        ->and($table->getFilter('meditation_type_id')->isPreloaded())->toBeTrue();
 });
 
 test('practice list can filter by day and related fields and updates the title count', function () {
@@ -490,6 +507,21 @@ test('practice form selects show option counts in dropdown labels', function () 
         1 => '1 Day (2)',
         2 => '2 Day (1)',
     ])
+        ->and($fields['day']->isNative())->toBeFalse()
+        ->and($fields['day']->isSearchable())->toBeTrue()
+        ->and($fields['day']->isPreloaded())->toBeTrue()
+        ->and($fields['focus_problem_id']->isNative())->toBeFalse()
+        ->and($fields['focus_problem_id']->isSearchable())->toBeTrue()
+        ->and($fields['focus_problem_id']->isPreloaded())->toBeTrue()
+        ->and($fields['experience_level_id']->isNative())->toBeFalse()
+        ->and($fields['experience_level_id']->isSearchable())->toBeTrue()
+        ->and($fields['experience_level_id']->isPreloaded())->toBeTrue()
+        ->and($fields['module_choice_id']->isNative())->toBeFalse()
+        ->and($fields['module_choice_id']->isSearchable())->toBeTrue()
+        ->and($fields['module_choice_id']->isPreloaded())->toBeTrue()
+        ->and($fields['meditation_type_id']->isNative())->toBeFalse()
+        ->and($fields['meditation_type_id']->isSearchable())->toBeTrue()
+        ->and($fields['meditation_type_id']->isPreloaded())->toBeTrue()
         ->and($fields['focus_problem_id']->getOptions()[$focusProblem->id])->toBe('Anxiety (2)')
         ->and($fields['focus_problem_id']->getOptions()[$otherFocusProblem->id])->toBe('Fatigue (1)')
         ->and($fields['experience_level_id']->getOptions()[$experienceLevel->id])->toBe('Beginner (2)')

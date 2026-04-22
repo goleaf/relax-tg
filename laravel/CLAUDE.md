@@ -1,3 +1,16 @@
+## Project Snapshot
+
+- Project: Relax TG
+- Purpose: manage a multilingual meditation practice program in Filament and expose the same content to Telegram through secured internal API endpoints and a webhook bot flow.
+- Core admin sections: Dashboard, Practices, Categories, Languages.
+- Managed entities: practices, focus problems, experience levels, module choices, meditation types, and enabled languages.
+- Practice content model: day, duration, active state, image/video media, translated title, translated description, and taxonomy relationships.
+- Telegram surface: `POST /api/telegram/webhook`, `GET /api/telegram/practices`, `GET /api/telegram/practices/{practice}`.
+- Supported Filament locales: `de`, `en`, `es`, `fr`, `it`, `lt`, `pl`, `ru`, `uk`.
+- UI conventions: topbar navigation order is Dashboard, Practices, Categories, Languages; Categories is a dropdown with icons; authenticated topbar uses a direct logout button instead of a profile dropdown.
+- Query conventions: use `Practice::selectResourceColumns()`, `Practice::withTaxonomyTitles()`, model scopes, eager loading, and existing practice/language indexes before adding new query logic.
+- Primary verification commands: `php artisan test --compact`, `vendor/bin/pint --dirty --format agent`, `npm run build`.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

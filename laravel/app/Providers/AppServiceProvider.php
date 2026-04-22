@@ -2,13 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Language;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    private const FILAMENT_INTERFACE_LOCALES = ['en', 'ru'];
-
     /**
      * Register any application services.
      */
@@ -24,8 +23,21 @@ class AppServiceProvider extends ServiceProvider
     {
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
-                ->locales(self::FILAMENT_INTERFACE_LOCALES)
+                ->locales(Language::supportedInterfaceLocales())
+                ->labels(self::filamentInterfaceLabels())
                 ->displayLocale(fn (): string => app()->getLocale());
         });
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function filamentInterfaceLabels(): array
+    {
+        return collect(Language::supportedInterfaceLocales())
+            ->mapWithKeys(fn (string $locale): array => [
+                $locale => Language::nativeName($locale, Language::displayName($locale, $locale)),
+            ])
+            ->all();
     }
 }

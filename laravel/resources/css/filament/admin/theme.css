@@ -1,0 +1,48 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/vendor/filament-topbar/**/*.blade.php';
+@source '../../../../vendor/jeffersongoncalves/filament-topbar/resources/views/**/*.blade.php';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+
+.fi-btn.fi-color:not(.fi-outlined),
+.fi-icon-btn.fi-color,
+label.fi-btn.fi-color {
+    --text: var(--color-white);
+    --hover-text: var(--color-white);
+    --dark-text: var(--color-white);
+    --dark-hover-text: var(--color-white);
+}
+
+.fi-btn.fi-color:not(.fi-outlined),
+.fi-icon-btn.fi-color,
+label.fi-btn.fi-color {
+    @apply text-white;
+}
+
+.fi-btn.fi-color:not(.fi-outlined) > .fi-icon,
+.fi-btn.fi-color:not(.fi-outlined) > .fi-loading-indicator,
+.fi-icon-btn.fi-color > .fi-icon,
+.fi-icon-btn.fi-color > .fi-loading-indicator,
+label.fi-btn.fi-color > .fi-icon,
+label.fi-btn.fi-color > .fi-loading-indicator {
+    @apply text-white;
+}
+
+.fi-topbar-logout-form {
+    @apply flex items-center;
+}
+
+.fi-topbar-logout-form .fi-btn {
+    @apply bg-red-600 text-white;
+}
+
+.fi-topbar-logout-form .fi-btn:hover,
+.fi-topbar-logout-form .fi-btn:focus-visible {
+    @apply bg-red-700 text-white;
+}
+
+.fi-topbar-logout-form .fi-btn .fi-icon {
+    @apply text-white;
+}

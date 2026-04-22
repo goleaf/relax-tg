@@ -21,6 +21,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -39,8 +40,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('')
             ->login()
             ->navigation(fn (): NavigationBuilder => $this->navigationBuilder())
+            ->userMenu(false)
             ->darkMode(false)
             ->maxContentWidth(Width::Full)
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -80,6 +83,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(__('admin.navigation_groups.categories'))
                     ->extraTopbarAttributes([
                         'data-test-topbar-link' => 'categories',
+                        'data-topbar-trigger-icon' => Heroicon::OutlinedFolder->value,
                     ])
                     ->items($this->categoryNavigationItems()),
                 NavigationGroup::make()->items(LanguageResource::getNavigationItems()),
