@@ -16,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class PracticeResource extends Resource
 {
@@ -31,8 +32,13 @@ class PracticeResource extends Resource
     {
         $items = [];
 
+        $counts = Practice::select('day', DB::raw('count(*) as total'))
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
         for ($i = 1; $i <= 29; $i++) {
-            $items[] = NavigationItem::make("{$i} Day")
+            $count = $counts[$i] ?? 0;
+            $items[] = NavigationItem::make("{$i} Day ({$count})")
                 ->group('Daily Practices')
                 ->icon(static::getNavigationIcon())
                 ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.practices.index') && request()->query('day') == $i)

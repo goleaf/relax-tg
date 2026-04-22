@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\ExperienceLevel;
-use App\Enums\FocusProblem;
-use App\Enums\MeditationType;
-use App\Enums\ModuleChoice;
+use App\Models\ExperienceLevel;
+use App\Models\FocusProblem;
 use App\Models\Language;
+use App\Models\MeditationType;
+use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -38,11 +38,11 @@ class PracticeFactory extends Factory
 
         return [
             'day' => $this->faker->numberBetween(1, 29),
-            'focus_problem' => $this->faker->randomElement(FocusProblem::cases()),
-            'experience_level' => $this->faker->randomElement(ExperienceLevel::cases()),
-            'module_choice' => $this->faker->randomElement(ModuleChoice::cases()),
-            'meditation_type' => $this->faker->randomElement(MeditationType::cases()),
-            'duration' => $this->faker->numberBetween(60, 1800), // 1 to 30 minutes
+            'focus_problem_id' => FocusProblem::inRandomOrder()->first()?->id ?? FocusProblem::factory(),
+            'experience_level_id' => ExperienceLevel::inRandomOrder()->first()?->id ?? ExperienceLevel::factory(),
+            'module_choice_id' => ModuleChoice::inRandomOrder()->first()?->id ?? ModuleChoice::factory(),
+            'meditation_type_id' => MeditationType::inRandomOrder()->first()?->id ?? MeditationType::factory(),
+            'duration' => $this->faker->numberBetween(60, 1800),
             'image_url' => $this->faker->imageUrl(),
             'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             'is_active' => $this->faker->boolean(90),

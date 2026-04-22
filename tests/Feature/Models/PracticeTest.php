@@ -4,23 +4,24 @@ use App\Models\Practice;
 
 test('it can create a practice with translated fields', function () {
     $practice = Practice::create([
-        'title' => ['en' => 'Morning Meditation', 'sk' => 'Ranná meditácia'],
-        'description' => ['en' => 'A calming morning practice.', 'sk' => 'Upokojujúca ranná prax.'],
+        'day' => 1,
+        'title' => ['en' => 'Morning Meditation', 'ru' => 'Утренняя медитация'],
+        'description' => ['en' => 'A calming morning practice.', 'ru' => 'Успокаивающая утренняя практика.'],
     ]);
 
     expect($practice)
         ->toBeInstanceOf(Practice::class)
         ->and($practice->title['en'])->toBe('Morning Meditation')
-        ->and($practice->title['sk'])->toBe('Ranná meditácia');
+        ->and($practice->title['ru'])->toBe('Утренняя медитация');
 });
 
 test('it returns the correct title for the requested locale', function () {
     $practice = Practice::factory()->create([
-        'title' => ['en' => 'Breathing Exercise', 'sk' => 'Dychové cvičenie'],
+        'title' => ['en' => 'Breathing Exercise', 'ru' => 'Дыхательное упражнение'],
     ]);
 
     expect($practice->getTitle('en'))->toBe('Breathing Exercise')
-        ->and($practice->getTitle('sk'))->toBe('Dychové cvičenie');
+        ->and($practice->getTitle('ru'))->toBe('Дыхательное упражнение');
 });
 
 test('it falls back to english when locale is missing', function () {

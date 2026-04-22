@@ -2,10 +2,6 @@
 
 namespace App\Filament\Resources\Practices\Schemas;
 
-use App\Enums\ExperienceLevel;
-use App\Enums\FocusProblem;
-use App\Enums\MeditationType;
-use App\Enums\ModuleChoice;
 use App\Filament\Support\LanguageTabsBuilder;
 use App\Models\Language;
 use Filament\Forms\Components\Select;
@@ -34,18 +30,38 @@ class PracticeForm
 
                 Section::make('Categorization')
                     ->schema([
-                        Select::make('focus_problem')
-                            ->options(FocusProblem::class)
-                            ->required(),
-                        Select::make('experience_level')
-                            ->options(ExperienceLevel::class)
-                            ->required(),
-                        Select::make('module_choice')
-                            ->options(ModuleChoice::class)
-                            ->required(),
-                        Select::make('meditation_type')
-                            ->options(MeditationType::class)
-                            ->required(),
+                        Select::make('focus_problem_id')
+                            ->label('Focus Problem')
+                            ->relationship('focusProblem', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(fn () => request()->query('focus_problem_id')),
+                        Select::make('experience_level_id')
+                            ->label('Experience Level')
+                            ->relationship('experienceLevel', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(fn () => request()->query('experience_level_id')),
+                        Select::make('module_choice_id')
+                            ->label('Module Choice')
+                            ->relationship('moduleChoice', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(fn () => request()->query('module_choice_id')),
+                        Select::make('meditation_type_id')
+                            ->label('Meditation Type')
+                            ->relationship('meditationType', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->default(fn () => request()->query('meditation_type_id')),
                     ])->columns(2),
 
                 Section::make('Media & Duration')

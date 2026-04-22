@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ExperienceLevel;
-use App\Enums\FocusProblem;
-use App\Enums\MeditationType;
-use App\Enums\ModuleChoice;
 use App\Filament\Resources\Practices\Pages\CreatePractice;
 use App\Filament\Resources\Practices\Pages\EditPractice;
 use App\Filament\Resources\Practices\Pages\ListPractices;
 use App\Filament\Resources\Practices\PracticeResource;
+use App\Models\ExperienceLevel;
+use App\Models\FocusProblem;
 use App\Models\Language;
+use App\Models\MeditationType;
+use App\Models\ModuleChoice;
 use App\Models\Practice;
 use App\Models\User;
 use Livewire\Livewire;
@@ -39,13 +39,18 @@ test('can render practice create page', function () {
 });
 
 test('can create a practice', function () {
+    $focusProblem = FocusProblem::factory()->create();
+    $experienceLevel = ExperienceLevel::factory()->create();
+    $moduleChoice = ModuleChoice::factory()->create();
+    $meditationType = MeditationType::factory()->create();
+
     Livewire::test(CreatePractice::class)
         ->fillForm([
             'day' => 1,
-            'focus_problem' => FocusProblem::Focus,
-            'experience_level' => ExperienceLevel::Beginner,
-            'module_choice' => ModuleChoice::Main,
-            'meditation_type' => MeditationType::Breath,
+            'focus_problem_id' => $focusProblem->id,
+            'experience_level_id' => $experienceLevel->id,
+            'module_choice_id' => $moduleChoice->id,
+            'meditation_type_id' => $meditationType->id,
             'duration' => 600,
             'title.en' => 'Mindful Breathing',
             'description.en' => 'A simple breathing practice for daily calm.',
@@ -55,7 +60,7 @@ test('can create a practice', function () {
 
     expect(Practice::query()
         ->whereJsonContains('title->en', 'Mindful Breathing')
-        ->where('focus_problem', FocusProblem::Focus)
+        ->where('focus_problem_id', $focusProblem->id)
         ->exists()
     )->toBeTrue();
 });

@@ -6,6 +6,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PracticesTable
@@ -28,7 +29,25 @@ class PracticesTable
                     ->sortable()
                     ->limit(50)
                     ->width('250px'),
-                TextColumn::make('meditation_type')
+                TextColumn::make('focusProblem.title.'.$locale)
+                    ->label('Focus Problem')
+                    ->badge()
+                    ->sortable()
+                    ->toggleable()
+                    ->width('150px'),
+                TextColumn::make('experienceLevel.title.'.$locale)
+                    ->label('Level')
+                    ->badge()
+                    ->sortable()
+                    ->toggleable()
+                    ->width('150px'),
+                TextColumn::make('moduleChoice.title.'.$locale)
+                    ->label('Module')
+                    ->badge()
+                    ->sortable()
+                    ->toggleable()
+                    ->width('150px'),
+                TextColumn::make('meditationType.title.'.$locale)
                     ->label('Type')
                     ->badge()
                     ->sortable()
@@ -51,7 +70,32 @@ class PracticesTable
                     ->width('150px'),
             ])
             ->filters([
-                //
+                SelectFilter::make('focus_problem_id')
+                    ->label('Focus Problem')
+                    ->relationship('focusProblem', 'id')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('experience_level_id')
+                    ->label('Experience Level')
+                    ->relationship('experienceLevel', 'id')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('module_choice_id')
+                    ->label('Module Choice')
+                    ->relationship('moduleChoice', 'id')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('meditation_type_id')
+                    ->label('Meditation Type')
+                    ->relationship('meditationType', 'id')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTitle(app()->getLocale()))
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('day')
+                    ->options(array_combine(range(1, 29), array_map(fn ($i) => "{$i} Day", range(1, 29)))),
             ])
             ->recordActions([
                 EditAction::make(),

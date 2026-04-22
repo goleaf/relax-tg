@@ -11,8 +11,18 @@ class CreatePractice extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if ($day = request()->query('day')) {
-            $data['day'] = $day;
+        $queryParams = [
+            'day',
+            'focus_problem',
+            'experience_level',
+            'module_choice',
+            'meditation_type',
+        ];
+
+        foreach ($queryParams as $param) {
+            if ($value = request()->query($param)) {
+                $data[$param] = $value;
+            }
         }
 
         return $data;
@@ -20,6 +30,12 @@ class CreatePractice extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index', ['day' => $this->record->day]);
+        return $this->getResource()::getUrl('index', [
+            'day' => $this->record->day,
+            'focus_problem' => $this->record->focus_problem->value ?? $this->record->focus_problem,
+            'experience_level' => $this->record->experience_level->value ?? $this->record->experience_level,
+            'module_choice' => $this->record->module_choice->value ?? $this->record->module_choice,
+            'meditation_type' => $this->record->meditation_type->value ?? $this->record->meditation_type,
+        ]);
     }
 }
