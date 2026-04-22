@@ -13,14 +13,36 @@ class ListTelegramPracticesController extends Controller
     public function __invoke(ListTelegramPracticesRequest $request): AnonymousResourceCollection
     {
         $validated = $request->validated();
-        $locale = (string) ($validated['locale'] ?? app()->getLocale());
+        $locale = isset($validated['locale']) && is_string($validated['locale'])
+            ? $validated['locale']
+            : app()->getLocale();
         $request->attributes->set('telegram_locale', $locale);
+        $perPage = $this->validatedInt($validated['per_page'] ?? null) ?? 15;
 
         $practices = Practice::query()
-            ->forTelegramDelivery($validated, $request->boolean('active_only', true))
-            ->simplePaginate(isset($validated['per_page']) ? (int) $validated['per_page'] : 15)
+            ->forTelegramDelivery([
+                'day' => $this->validatedInt($validated['day'] ?? null),
+                'focus_problem_id' => $this->validatedInt($validated['focus_problem_id'] ?? null),
+                'experience_level_id' => $this->validatedInt($validated['experience_level_id'] ?? null),
+                'module_choice_id' => $this->validatedInt($validated['module_choice_id'] ?? null),
+                'meditation_type_id' => $this->validatedInt($validated['meditation_type_id'] ?? null),
+            ], $request->boolean('active_only', true))
+            ->simplePaginate($perPage)
             ->withQueryString();
 
         return TelegramPracticeResource::collection($practices);
+    }
+
+    private function validatedInt(mixed $value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return null;
     }
 }

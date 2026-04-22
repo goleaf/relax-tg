@@ -7,6 +7,8 @@ use App\Models\FocusProblem;
 use App\Models\MeditationType;
 use App\Models\ModuleChoice;
 use App\Models\Practice;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Icons\Heroicon;
@@ -23,7 +25,7 @@ class PracticesTable
     /**
      * @param  array<int, string>  $hiddenColumns
      * @param  array<int, string>  $excludedFilters
-     * @param  array<int, mixed>  $headerActions
+     * @param  array<int, Action|ActionGroup>  $headerActions
      */
     public static function configure(
         Table $table,
@@ -107,28 +109,28 @@ class PracticesTable
                     ->width('80px'),
             ])
             ->filters(array_values(array_filter([
-                static::dayFilter(
+                self::dayFilter(
                     excluded: in_array('day', $excludedFilters, true),
                 ),
-                static::taxonomyFilter(
+                self::taxonomyFilter(
                     field: 'focus_problem_id',
                     label: __('admin.resources.practices.fields.focus_problem'),
                     relationship: 'focusProblem',
                     excluded: in_array('focus_problem_id', $excludedFilters, true),
                 ),
-                static::taxonomyFilter(
+                self::taxonomyFilter(
                     field: 'experience_level_id',
                     label: __('admin.resources.practices.fields.experience_level'),
                     relationship: 'experienceLevel',
                     excluded: in_array('experience_level_id', $excludedFilters, true),
                 ),
-                static::taxonomyFilter(
+                self::taxonomyFilter(
                     field: 'module_choice_id',
                     label: __('admin.resources.practices.fields.module_choice'),
                     relationship: 'moduleChoice',
                     excluded: in_array('module_choice_id', $excludedFilters, true),
                 ),
-                static::taxonomyFilter(
+                self::taxonomyFilter(
                     field: 'meditation_type_id',
                     label: __('admin.resources.practices.fields.meditation_type'),
                     relationship: 'meditationType',
@@ -163,9 +165,9 @@ class PracticesTable
             ->searchable()
             ->preload()
             ->optionsLimit(29)
-            ->indicateUsing(fn (array $state): ?string => static::dayFilterIndicator($state))
-            ->options(fn (HasTable $livewire): array => static::dayOptionsWithCounts(
-                static::tableFilters($livewire),
+            ->indicateUsing(fn (array $state): ?string => self::dayFilterIndicator($state))
+            ->options(fn (HasTable $livewire): array => self::dayOptionsWithCounts(
+                self::tableFilters($livewire),
             ));
     }
 
@@ -186,25 +188,26 @@ class PracticesTable
                 $relationship,
                 'id',
                 fn (Builder $query, HasTable $livewire) => $query
-                    ->forFilamentOptions()
+                    ->orderBy('id')
+                    ->select(['id', 'title'])
                     ->withCount([
-                        'practices' => fn (Builder $query) => static::applyPracticeFilters(
+                        'practices' => fn (Builder $query) => self::applyPracticeFilters(
                             $query,
-                            static::tableFilters($livewire),
+                            self::tableFilters($livewire),
                             excludedField: $field,
                         ),
                     ]),
             )
             ->getOptionLabelFromRecordUsing(
-                fn ($record): string => Practice::formatCountedLabel(
+                fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): string => Practice::formatCountedLabel(
                     $record->getTitle(app()->getLocale()),
-                    (int) $record->practices_count,
+                    $record->practices_count ?? 0,
                 ),
             )
             ->indicateUsing(
                 fn (array $state): ?string => Practice::relationFilterIndicator(
                     $field,
-                    $state['value'] ?? null,
+                    self::filterScalar($state['value'] ?? null),
                     app()->getLocale(),
                     $label,
                 ),
@@ -214,7 +217,7 @@ class PracticesTable
     }
 
     /**
-     * @param  array<string, mixed>  $state
+     * @param  array<mixed>  $state
      */
     private static function dayFilterIndicator(array $state): ?string
     {
@@ -224,9 +227,15 @@ class PracticesTable
             return null;
         }
 
+        $day = self::filterValueFromMixed($value);
+
+        if ($day === null) {
+            return null;
+        }
+
         return __('admin.resources.practices.filters.indicator', [
             'label' => __('admin.resources.practices.fields.day'),
-            'value' => Practice::formatDay((int) $value),
+            'value' => Practice::formatDay($day),
         ]);
     }
 
@@ -236,7 +245,7 @@ class PracticesTable
      */
     private static function dayOptionsWithCounts(array $filters): array
     {
-        $counts = static::applyPracticeFilters(
+        $counts = self::applyPracticeFilters(
             Practice::query(),
             $filters,
             excludedField: 'day',
@@ -246,7 +255,7 @@ class PracticesTable
 
         return collect(Practice::dayOptions())
             ->mapWithKeys(fn (string $label, int $day): array => [
-                $day => Practice::formatCountedLabel($label, (int) ($counts[$day] ?? 0)),
+                $day => Practice::formatCountedLabel($label, self::filterValueFromMixed($counts[$day] ?? 0) ?? 0),
             ])
             ->all();
     }
@@ -262,11 +271,11 @@ class PracticesTable
         ?string $excludedField = null,
     ): Builder {
         return $query
-            ->forDay($excludedField === 'day' ? null : static::filterValue($filters, 'day'))
-            ->forFocusProblem($excludedField === 'focus_problem_id' ? null : static::filterValue($filters, 'focus_problem_id'))
-            ->forExperienceLevel($excludedField === 'experience_level_id' ? null : static::filterValue($filters, 'experience_level_id'))
-            ->forModuleChoice($excludedField === 'module_choice_id' ? null : static::filterValue($filters, 'module_choice_id'))
-            ->forMeditationType($excludedField === 'meditation_type_id' ? null : static::filterValue($filters, 'meditation_type_id'));
+            ->forDay($excludedField === 'day' ? null : self::filterValue($filters, 'day'))
+            ->forFocusProblem($excludedField === 'focus_problem_id' ? null : self::filterValue($filters, 'focus_problem_id'))
+            ->forExperienceLevel($excludedField === 'experience_level_id' ? null : self::filterValue($filters, 'experience_level_id'))
+            ->forModuleChoice($excludedField === 'module_choice_id' ? null : self::filterValue($filters, 'module_choice_id'))
+            ->forMeditationType($excludedField === 'meditation_type_id' ? null : self::filterValue($filters, 'meditation_type_id'));
     }
 
     /**
@@ -276,7 +285,7 @@ class PracticesTable
     {
         $value = data_get($filters, "{$field}.value");
 
-        return filled($value) ? (int) $value : null;
+        return self::filterValueFromMixed($value);
     }
 
     /**
@@ -284,6 +293,42 @@ class PracticesTable
      */
     private static function tableFilters(HasTable $livewire): array
     {
-        return is_array($livewire->tableFilters ?? null) ? $livewire->tableFilters : [];
+        if (! property_exists($livewire, 'tableFilters')) {
+            return [];
+        }
+
+        $filters = $livewire->tableFilters;
+
+        if (! is_array($filters)) {
+            return [];
+        }
+
+        $normalizedFilters = [];
+
+        foreach ($filters as $key => $value) {
+            if (is_string($key)) {
+                $normalizedFilters[$key] = $value;
+            }
+        }
+
+        return $normalizedFilters;
+    }
+
+    private static function filterValueFromMixed(mixed $value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    private static function filterScalar(mixed $value): int|string|null
+    {
+        return is_int($value) || is_string($value) ? $value : null;
     }
 }

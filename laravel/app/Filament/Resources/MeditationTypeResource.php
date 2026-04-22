@@ -20,6 +20,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends resource<MeditationType>
+ */
 class MeditationTypeResource extends Resource
 {
     protected static ?string $model = MeditationType::class;
@@ -99,9 +102,12 @@ class MeditationTypeResource extends Resource
             ]);
     }
 
+    /**
+     * @return Builder<MeditationType>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return MeditationType::query()
             ->forFilamentIndex();
     }
 

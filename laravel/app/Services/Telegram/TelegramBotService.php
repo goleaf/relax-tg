@@ -24,6 +24,9 @@ class TelegramBotService
         return $this->bot()->getWebhookUpdate(false);
     }
 
+    /**
+     * @param  array<string, mixed>  $extra
+     */
     public function sendMessage(int|string $chatId, string $text, array $extra = []): void
     {
         $this->bot()->sendMessage([
@@ -36,7 +39,8 @@ class TelegramBotService
     public function syncWebhook(bool $dropPendingUpdates = false): bool
     {
         $botConfig = $this->botsManager->getBotConfig();
-        $webhookUrl = (string) data_get($botConfig, 'webhook_url');
+        $webhookUrl = data_get($botConfig, 'webhook_url');
+        $webhookUrl = is_string($webhookUrl) ? $webhookUrl : '';
 
         if (! Str::startsWith($webhookUrl, 'https://')) {
             throw new RuntimeException('TELEGRAM_WEBHOOK_URL must be a valid https:// URL.');
@@ -48,17 +52,18 @@ class TelegramBotService
 
         $certificatePath = data_get($botConfig, 'certificate_path');
 
-        if (filled($certificatePath)) {
+        if (is_string($certificatePath) && filled($certificatePath)) {
             $params['certificate'] = $certificatePath;
         }
 
         $allowedUpdates = data_get($botConfig, 'allowed_updates');
 
-        if (filled($allowedUpdates)) {
+        if (is_array($allowedUpdates) && ($allowedUpdates !== [])) {
             $params['allowed_updates'] = $allowedUpdates;
         }
 
-        $webhookSecret = (string) config('services.telegram.webhook_secret');
+        $webhookSecret = config('services.telegram.webhook_secret');
+        $webhookSecret = is_string($webhookSecret) ? $webhookSecret : '';
 
         if ($webhookSecret !== '') {
             $params['secret_token'] = $webhookSecret;

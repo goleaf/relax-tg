@@ -16,10 +16,13 @@ class TelegramWebhookController extends Controller
         TelegramBotService $telegramBotService,
         HandleTelegramUpdateAction $handleTelegramUpdateAction,
     ): JsonResponse {
-        $configuredSecret = (string) config('services.telegram.webhook_secret');
+        $configuredSecret = config('services.telegram.webhook_secret');
+        $configuredSecret = is_string($configuredSecret) ? $configuredSecret : '';
+        $providedSecret = $request->header('X-Telegram-Bot-Api-Secret-Token');
+        $providedSecret = is_string($providedSecret) ? $providedSecret : '';
 
         if (($configuredSecret !== '')
-            && (! hash_equals($configuredSecret, (string) $request->header('X-Telegram-Bot-Api-Secret-Token')))) {
+            && (! hash_equals($configuredSecret, $providedSecret))) {
             return response()->json([
                 'message' => __('http-statuses.403'),
             ], Response::HTTP_FORBIDDEN);

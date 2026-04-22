@@ -3,7 +3,11 @@
 namespace App\Filament\Resources\Practices\Schemas;
 
 use App\Filament\Support\LanguageTabsBuilder;
+use App\Models\ExperienceLevel;
+use App\Models\FocusProblem;
 use App\Models\Language;
+use App\Models\MeditationType;
+use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -24,28 +28,28 @@ class PracticeForm
     public static function configure(Schema $schema, array $hiddenFields = []): Schema
     {
         $categorizationFields = array_values(array_filter([
-            static::taxonomySelect(
+            self::taxonomySelect(
                 field: 'focus_problem_id',
                 label: __('admin.resources.practices.fields.focus_problem'),
                 relationship: 'focusProblem',
                 icon: Heroicon::OutlinedBolt,
                 hidden: in_array('focus_problem_id', $hiddenFields, true),
             ),
-            static::taxonomySelect(
+            self::taxonomySelect(
                 field: 'experience_level_id',
                 label: __('admin.resources.practices.fields.experience_level'),
                 relationship: 'experienceLevel',
                 icon: Heroicon::OutlinedChartBar,
                 hidden: in_array('experience_level_id', $hiddenFields, true),
             ),
-            static::taxonomySelect(
+            self::taxonomySelect(
                 field: 'module_choice_id',
                 label: __('admin.resources.practices.fields.module_choice'),
                 relationship: 'moduleChoice',
                 icon: Heroicon::OutlinedSquares2x2,
                 hidden: in_array('module_choice_id', $hiddenFields, true),
             ),
-            static::taxonomySelect(
+            self::taxonomySelect(
                 field: 'meditation_type_id',
                 label: __('admin.resources.practices.fields.meditation_type'),
                 relationship: 'meditationType',
@@ -87,8 +91,8 @@ class PracticeForm
                             ->required()
                             ->minValue(0)
                             ->columnSpanFull(),
-                        static::imageUpload(),
-                        static::videoUpload(),
+                        self::imageUpload(),
+                        self::videoUpload(),
                     ])->columns(1),
 
                 Section::make(__('admin.resources.practices.sections.translations'))
@@ -131,13 +135,14 @@ class PracticeForm
                 $relationship,
                 'id',
                 fn (Builder $query) => $query
-                    ->forFilamentOptions()
+                    ->orderBy('id')
+                    ->select(['id', 'title'])
                     ->withCount('practices'),
             )
             ->getOptionLabelFromRecordUsing(
-                fn ($record): string => Practice::formatCountedLabel(
+                fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): string => Practice::formatCountedLabel(
                     $record->getTitle(app()->getLocale()),
-                    (int) $record->practices_count,
+                    $record->practices_count ?? 0,
                 ),
             )
             ->native(false)

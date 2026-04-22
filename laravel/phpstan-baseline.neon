@@ -1,0 +1,787 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to protected property Pest\<Tests\\TestCase\>\:\:\$app\.$#'
+			identifier: property.protected
+			count: 2
+			path: tests/Feature/Api/TelegramWebhookTest.php
+
+		-
+			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:once\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: tests/Feature/Api/TelegramWebhookTest.php
+
+		-
+			message: '#^Cannot call method andReturn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Api/TelegramWebhookTest.php
+
+		-
+			message: '#^Cannot call method withArgs\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Api/TelegramWebhookTest.php
+
+		-
+			message: '#^Access to protected property Pest\<Tests\\TestCase\>\:\:\$app\.$#'
+			identifier: property.protected
+			count: 1
+			path: tests/Feature/Console/SyncTelegramWebhookCommandTest.php
+
+		-
+			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:once\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Feature/Console/SyncTelegramWebhookCommandTest.php
+
+		-
+			message: '#^Cannot call method andReturn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Console/SyncTelegramWebhookCommandTest.php
+
+		-
+			message: '#^Cannot call method expectsOutput\(\) on Illuminate\\Testing\\PendingCommand\|int\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Console/SyncTelegramWebhookCommandTest.php
+
+		-
+			message: '#^Cannot call method with\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Console/SyncTelegramWebhookCommandTest.php
+
+		-
+			message: '#^Cannot access offset ''en'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot access offset ''ru'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot access property \$slug on mixed\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot access property \$title on mixed\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method count\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method create\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method fresh\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method getKey\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method getTitle\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method sole\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function expect$#'
+			identifier: argument.templateType
+			count: 1
+			path: tests/Feature/Filament/CategoryTranslationsTest.php
+
+		-
+			message: '#^Anonymous function should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 2
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot access property \$not on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 7
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method assertSeeText\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 8
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method buildNavigation\(\) on Filament\\Panel\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method getIcon\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method getLabel\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method toBeNull\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Illuminate\\Foundation\\Testing\\TestCase\:\:actingAs\(\) expects Illuminate\\Contracts\\Auth\\Authenticatable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: array.invalidKey
+			count: 1
+			path: tests/Feature/Filament/DashboardTest.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Illuminate\\Foundation\\Testing\\TestCase\:\:actingAs\(\) expects Illuminate\\Contracts\\Auth\\Authenticatable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Feature/Filament/LanguageResourceTest.php
+
+		-
+			message: '#^Anonymous function should return bool but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Call to an undefined method Livewire\\Component\:\:getSchema\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Call to an undefined method Livewire\\Component\:\:getTable\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Call to an undefined method Livewire\\Component\:\:getTitle\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset ''day'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset ''experience_level_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset ''focus_problem_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset ''meditation_type_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset ''module_choice_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access offset int on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 18
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access property \$image_path on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access property \$not on mixed\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access property \$title on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot access property \$video_path on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method all\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 68
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method get\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getChildItems\(\) on Filament\\Navigation\\NavigationItem\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getFilter\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 22
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getFilterIndicators\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getFilters\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getFiltersLayout\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getFlatFields\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getGroup\(\) on Filament\\Navigation\\NavigationItem\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getLabel\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getOptions\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 11
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getRelationshipQuery\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method getSearchable\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method hasDeferredFilters\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method isHidden\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method isNative\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 10
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method isPreloaded\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 10
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method isSearchable\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method mapWithKeys\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 22
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toBeFalse\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 11
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toBeNull\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 20
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toContain\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 11
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method toStartWith\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_keys expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Parameter \#1 \$path of method Illuminate\\Filesystem\\FilesystemAdapter\:\:assertExists\(\) expects array\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 4
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Illuminate\\Foundation\\Testing\\TestCase\:\:actingAs\(\) expects Illuminate\\Contracts\\Auth\\Authenticatable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect expects Illuminate\\Contracts\\Support\\Arrayable\<\(int\|string\), mixed\>\|iterable\<\(int\|string\), mixed\>\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: array.invalidKey
+			count: 5
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Unable to resolve the template type TComponent in call to method Livewire\\LivewireManager\:\:test\(\)$#'
+			identifier: argument.templateType
+			count: 2
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function expect$#'
+			identifier: argument.templateType
+			count: 1
+			path: tests/Feature/Filament/PracticeResourceTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: tests/Feature/LanguageSeederTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/LanguageSeederTest.php
+
+		-
+			message: '#^Cannot call method toBeFalse\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/LanguageSeederTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/LanguageSeederTest.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Feature/LanguageSeederTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/LocalizationSupportTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: tests/Feature/LocalizationSupportTest.php
+
+		-
+			message: '#^Cannot access property \$code on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot access property \$is_enabled on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot access property \$native_name on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Models/LanguageTest.php
+
+		-
+			message: '#^Cannot access property \$duration on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$experience_level_id on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$focus_problem_id on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$id on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$image_path on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$meditation_type_id on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$module_choice_id on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$video_path on App\\Models\\Practice\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 14
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method is\(\) on App\\Models\\Practice\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 11
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method toBeFalse\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot call method toContain\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: tests/Feature/Models/PracticeTest.php
+
+		-
+			message: '#^Cannot access property \$email on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/UserTest.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: tests/Feature/Models/UserTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/Models/UserTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 9
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method toBeGreaterThan\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method toBeTrue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method toEndWith\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method toHaveCount\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Parameter \#1 \$path of method Illuminate\\Filesystem\\FilesystemAdapter\:\:exists\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Parameter \#1 \$path of method Illuminate\\Filesystem\\FilesystemAdapter\:\:size\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Feature/PracticeSeederMediaTest.php
+
+		-
+			message: '#^Cannot call method and\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 18
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Cannot call method toBe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Cannot call method toContain\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Cannot call method toEndWith\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Cannot call method toStartWith\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Offset ''en'' might not exist on array\<string, string\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
+			path: tests/Feature/PracticeSeederTest.php
+
+		-
+			message: '#^Offset ''ru'' might not exist on array\<string, string\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
+			path: tests/Feature/PracticeSeederTest.php

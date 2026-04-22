@@ -18,6 +18,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends resource<Practice>
+ */
 class PracticeResource extends Resource
 {
     protected static ?string $model = Practice::class;
@@ -53,9 +56,12 @@ class PracticeResource extends Resource
             ->all();
     }
 
+    /**
+     * @return Builder<Practice>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return Practice::query()
             ->forResourceIndex();
     }
 

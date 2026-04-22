@@ -15,7 +15,8 @@ class EnsureTelegramApiToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $configuredToken = (string) config('services.telegram.internal_api_token');
+        $configuredToken = config('services.telegram.internal_api_token');
+        $configuredToken = is_string($configuredToken) ? $configuredToken : '';
 
         if ($configuredToken === '') {
             return response()->json([
@@ -23,7 +24,7 @@ class EnsureTelegramApiToken
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $providedToken = (string) $request->bearerToken();
+        $providedToken = $request->bearerToken() ?? '';
 
         if (($providedToken === '') || (! hash_equals($configuredToken, $providedToken))) {
             return response()->json([

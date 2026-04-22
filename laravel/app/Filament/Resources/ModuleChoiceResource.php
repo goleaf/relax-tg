@@ -20,6 +20,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends resource<ModuleChoice>
+ */
 class ModuleChoiceResource extends Resource
 {
     protected static ?string $model = ModuleChoice::class;
@@ -99,9 +102,12 @@ class ModuleChoiceResource extends Resource
             ]);
     }
 
+    /**
+     * @return Builder<ModuleChoice>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return ModuleChoice::query()
             ->forFilamentIndex();
     }
 

@@ -3,12 +3,17 @@
 namespace App\Filament\Resources\Practices\Pages;
 
 use App\Filament\Resources\Practices\PracticeResource;
+use App\Models\Practice;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreatePractice extends CreateRecord
 {
     protected static string $resource = PracticeResource::class;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $filterFields = [
@@ -32,18 +37,27 @@ class CreatePractice extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        $filters = collect([
-            'day' => $this->record->day,
-            'focus_problem_id' => $this->record->focus_problem_id,
-            'experience_level_id' => $this->record->experience_level_id,
-            'module_choice_id' => $this->record->module_choice_id,
-            'meditation_type_id' => $this->record->meditation_type_id,
-        ])
-            ->filter(fn (?int $value): bool => filled($value))
-            ->map(fn (int $value): array => ['value' => $value])
-            ->all();
+        $record = $this->getRecord();
 
-        return $this->getResource()::getUrl('index', [
+        if (! $record instanceof Practice) {
+            return PracticeResource::getUrl('index');
+        }
+
+        $filters = [];
+
+        foreach ([
+            'day' => $record->day,
+            'focus_problem_id' => $record->focus_problem_id,
+            'experience_level_id' => $record->experience_level_id,
+            'module_choice_id' => $record->module_choice_id,
+            'meditation_type_id' => $record->meditation_type_id,
+        ] as $field => $value) {
+            if ($value !== null) {
+                $filters[$field] = ['value' => $value];
+            }
+        }
+
+        return PracticeResource::getUrl('index', [
             'filters' => $filters,
         ]);
     }

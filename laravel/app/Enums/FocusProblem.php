@@ -15,6 +15,9 @@ enum FocusProblem: string
         return __("enums.focus_problem.{$this->value}");
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function options(): array
     {
         return collect(self::cases())
@@ -22,6 +25,9 @@ enum FocusProblem: string
             ->all();
     }
 
+    /**
+     * @return list<string>
+     */
     public static function values(): array
     {
         return array_map(fn (self $case): string => $case->value, self::cases());

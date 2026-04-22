@@ -5,6 +5,7 @@ namespace App\Filament\Support;
 use App\Models\FocusProblem;
 use App\Models\Language;
 use App\Models\Practice;
+use Closure;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class PracticeDashboardData
@@ -40,6 +41,9 @@ class PracticeDashboardData
 
     private ?int $mediaReadyPractices = null;
 
+    /**
+     * @return array<int, float|int>
+     */
     public function averageDurationMinutesByDay(): array
     {
         return $this->seriesForDays(
@@ -52,6 +56,9 @@ class PracticeDashboardData
         return $this->averageDurationSeconds ??= (int) round((float) (Practice::query()->avg('duration') ?? 0));
     }
 
+    /**
+     * @return array<int, float|int>
+     */
     public function dayCoverageSeries(): array
     {
         return $this->seriesForDays(
@@ -59,6 +66,9 @@ class PracticeDashboardData
         );
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function dayLabels(): array
     {
         return array_values(Practice::dayOptions());
@@ -87,7 +97,7 @@ class PracticeDashboardData
             ->map(function (FocusProblem $focusProblem): array {
                 return [
                     'label' => $focusProblem->getTitle(app()->getLocale()),
-                    'count' => (int) $focusProblem->practices_count,
+                    'count' => $focusProblem->practices_count ?? 0,
                 ];
             })
             ->filter(fn (array $segment): bool => $segment['count'] > 0)
@@ -119,6 +129,9 @@ class PracticeDashboardData
             ->count();
     }
 
+    /**
+     * @return array<int, float|int>
+     */
     public function mediaReadyPracticesByDay(): array
     {
         return $this->seriesForDays(
@@ -126,6 +139,9 @@ class PracticeDashboardData
         );
     }
 
+    /**
+     * @return array<int, float|int>
+     */
     public function practiceCountsByDay(): array
     {
         return $this->seriesForDays(
@@ -138,6 +154,9 @@ class PracticeDashboardData
         return array_sum($this->dayCounts());
     }
 
+    /**
+     * @return EloquentCollection<int, FocusProblem>
+     */
     private function focusProblems(): EloquentCollection
     {
         return $this->focusProblems ??= FocusProblem::query()
@@ -171,10 +190,10 @@ class PracticeDashboardData
     }
 
     /**
-     * @param  callable(int): float|int  $callback
+     * @param  Closure(int): (float|int)  $callback
      * @return array<int, float|int>
      */
-    private function seriesForDays(callable $callback): array
+    private function seriesForDays(Closure $callback): array
     {
         return collect(array_keys(Practice::dayOptions()))
             ->map(function (int $day) use ($callback): float|int {

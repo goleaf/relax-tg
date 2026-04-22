@@ -41,25 +41,37 @@ class PracticeOverviewStats extends StatsOverviewWidget
         return [
             Stat::make(__('admin.widgets.practice_overview.stats.total_practices.label'), number_format($totalPractices))
                 ->description(__('admin.widgets.practice_overview.stats.total_practices.description'))
-                ->chart($this->dashboardData->practiceCountsByDay())
+                ->chart($this->chartValues($this->dashboardData->practiceCountsByDay()))
                 ->color('warning'),
             Stat::make(__('admin.widgets.practice_overview.stats.enabled_languages.label'), number_format($this->dashboardData->enabledLanguages()))
                 ->description(__('admin.widgets.practice_overview.stats.enabled_languages.description'))
                 ->color('primary'),
             Stat::make(__('admin.widgets.practice_overview.stats.days_covered.label'), $daysCovered.'/'.$totalDays)
                 ->description(__('admin.widgets.practice_overview.stats.days_covered.description'))
-                ->chart($this->dashboardData->dayCoverageSeries())
+                ->chart($this->chartValues($this->dashboardData->dayCoverageSeries()))
                 ->color($daysCovered === $totalDays ? 'success' : 'warning'),
             Stat::make(__('admin.widgets.practice_overview.stats.media_ready.label'), number_format($mediaReadyPractices))
                 ->description(__('admin.widgets.practice_overview.stats.media_ready.description', [
                     'percent' => $this->dashboardData->mediaReadyPercentage(),
                 ]))
-                ->chart($this->dashboardData->mediaReadyPracticesByDay())
+                ->chart($this->chartValues($this->dashboardData->mediaReadyPracticesByDay()))
                 ->color('success'),
             Stat::make(__('admin.widgets.practice_overview.stats.average_session.label'), $this->dashboardData->formattedAverageDuration())
                 ->description(__('admin.widgets.practice_overview.stats.average_session.description'))
-                ->chart($this->dashboardData->averageDurationMinutesByDay())
+                ->chart($this->chartValues($this->dashboardData->averageDurationMinutesByDay()))
                 ->color('info'),
         ];
+    }
+
+    /**
+     * @param  array<int, float|int>  $values
+     * @return list<float>
+     */
+    private function chartValues(array $values): array
+    {
+        return array_map(
+            fn (float|int $value): float => (float) $value,
+            array_values($values),
+        );
     }
 }

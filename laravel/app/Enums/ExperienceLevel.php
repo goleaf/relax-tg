@@ -13,6 +13,9 @@ enum ExperienceLevel: string
         return __("enums.experience_level.{$this->value}");
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function options(): array
     {
         return collect(self::cases())
@@ -20,6 +23,9 @@ enum ExperienceLevel: string
             ->all();
     }
 
+    /**
+     * @return list<string>
+     */
     public static function values(): array
     {
         return array_map(fn (self $case): string => $case->value, self::cases());

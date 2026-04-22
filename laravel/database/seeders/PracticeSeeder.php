@@ -486,14 +486,22 @@ class PracticeSeeder extends Seeder
      */
     private function seedTranslatedRecords(string $modelClass, array $titles): array
     {
-        return collect($titles)
-            ->map(
-                fn (array $title) => $modelClass::query()->updateOrCreate(
-                    ['title->en' => $title['en']],
-                    ['title' => $title],
-                ),
-            )
-            ->all();
+        $records = [];
+
+        foreach ($titles as $title) {
+            $record = $modelClass::query()->updateOrCreate(
+                ['title->en' => $title['en']],
+                ['title' => $title],
+            );
+
+            if (! $record instanceof $modelClass) {
+                throw new RuntimeException("Seeded record is not an instance of {$modelClass}.");
+            }
+
+            $records[] = $record;
+        }
+
+        return $records;
     }
 
     /**

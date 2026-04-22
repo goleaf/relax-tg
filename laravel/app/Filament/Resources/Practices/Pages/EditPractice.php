@@ -41,7 +41,13 @@ class EditPractice extends EditRecord
         $record = $this->getRecord();
 
         foreach ($this->originalMediaPaths as $attribute => $path) {
-            if (blank($path) || $path === $record->{$attribute}) {
+            $currentPath = match ($attribute) {
+                'image_path' => $record->image_path,
+                'video_path' => $record->video_path,
+                default => null,
+            };
+
+            if (blank($path) || $path === $currentPath) {
                 continue;
             }
 

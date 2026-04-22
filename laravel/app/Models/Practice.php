@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\PracticeFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Practice extends Model
 {
+    /** @use HasFactory<PracticeFactory> */
     use HasFactory;
 
     private const DAY_TOTAL = 29;
@@ -109,21 +111,33 @@ class Practice extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<FocusProblem, $this>
+     */
     public function focusProblem(): BelongsTo
     {
         return $this->belongsTo(FocusProblem::class);
     }
 
+    /**
+     * @return BelongsTo<ExperienceLevel, $this>
+     */
     public function experienceLevel(): BelongsTo
     {
         return $this->belongsTo(ExperienceLevel::class);
     }
 
+    /**
+     * @return BelongsTo<ModuleChoice, $this>
+     */
     public function moduleChoice(): BelongsTo
     {
         return $this->belongsTo(ModuleChoice::class);
     }
 
+    /**
+     * @return BelongsTo<MeditationType, $this>
+     */
     public function meditationType(): BelongsTo
     {
         return $this->belongsTo(MeditationType::class);
@@ -187,26 +201,51 @@ class Practice extends Model
     public function getTitle(?string $locale = null): string
     {
         $locale ??= app()->getLocale();
+        $fallbackLocale = config('app.fallback_locale', 'en');
+        $fallbackLocale = is_string($fallbackLocale) ? $fallbackLocale : 'en';
 
-        return $this->title[$locale]
-            ?? $this->title[config('app.fallback_locale', 'en')]
-            ?? collect($this->title)
-                ->first(fn (?string $value): bool => filled($value), '')
-            ?? '';
+        if (isset($this->title[$locale]) && filled($this->title[$locale])) {
+            return $this->title[$locale];
+        }
+
+        if (isset($this->title[$fallbackLocale]) && filled($this->title[$fallbackLocale])) {
+            return $this->title[$fallbackLocale];
+        }
+
+        foreach ($this->title as $value) {
+            if (filled($value)) {
+                return $value;
+            }
+        }
+
+        return '';
     }
 
     public function getDescription(?string $locale = null): ?string
     {
-        if (empty($this->description)) {
+        if (($this->description === null) || ($this->description === [])) {
             return null;
         }
 
         $locale ??= app()->getLocale();
+        $fallbackLocale = config('app.fallback_locale', 'en');
+        $fallbackLocale = is_string($fallbackLocale) ? $fallbackLocale : 'en';
 
-        return $this->description[$locale]
-            ?? $this->description[config('app.fallback_locale', 'en')]
-            ?? collect($this->description)
-                ->first(fn (?string $value): bool => filled($value));
+        if (isset($this->description[$locale]) && filled($this->description[$locale])) {
+            return $this->description[$locale];
+        }
+
+        if (isset($this->description[$fallbackLocale]) && filled($this->description[$fallbackLocale])) {
+            return $this->description[$fallbackLocale];
+        }
+
+        foreach ($this->description as $value) {
+            if (filled($value)) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 
     public function getImageUrl(): ?string
@@ -224,16 +263,28 @@ class Practice extends Model
         return "{$label} ({$count})";
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeLatestFirst(Builder $query): Builder
     {
         return $query->orderBy('id', 'desc');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeOrderedForProgram(Builder $query): Builder
     {
         return $query
@@ -241,11 +292,19 @@ class Practice extends Model
             ->orderBy('id');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForDay(Builder $query, ?int $day): Builder
     {
         return $query->when(filled($day), fn (Builder $query) => $query->where('day', $day));
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForFocusProblem(Builder $query, ?int $focusProblemId): Builder
     {
         return $query->when(
@@ -254,6 +313,10 @@ class Practice extends Model
         );
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForExperienceLevel(Builder $query, ?int $experienceLevelId): Builder
     {
         return $query->when(
@@ -262,6 +325,10 @@ class Practice extends Model
         );
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForModuleChoice(Builder $query, ?int $moduleChoiceId): Builder
     {
         return $query->when(
@@ -270,6 +337,10 @@ class Practice extends Model
         );
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForMeditationType(Builder $query, ?int $meditationTypeId): Builder
     {
         return $query->when(
@@ -278,6 +349,10 @@ class Practice extends Model
         );
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeSelectResourceColumns(Builder $query): Builder
     {
         return $query->select([
@@ -298,6 +373,10 @@ class Practice extends Model
         ]);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeWithTaxonomyTitles(Builder $query): Builder
     {
         return $query->with([
@@ -308,11 +387,15 @@ class Practice extends Model
         ]);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForResourceIndex(Builder $query): Builder
     {
-        return $query
-            ->selectResourceColumns()
-            ->withTaxonomyTitles();
+        return $this->scopeWithTaxonomyTitles(
+            $this->scopeSelectResourceColumns($query),
+        );
     }
 
     /**
@@ -323,21 +406,32 @@ class Practice extends Model
      *     module_choice_id?: int|string|null,
      *     meditation_type_id?: int|string|null
      * }  $filters
+     * @param  Builder<self>  $query
+     * @return Builder<self>
      */
     public function scopeForTelegramDelivery(Builder $query, array $filters = [], bool $activeOnly = true): Builder
     {
-        return $query
-            ->selectResourceColumns()
-            ->withTaxonomyTitles()
-            ->when($activeOnly, fn (Builder $query): Builder => $query->active())
-            ->forDay(isset($filters['day']) ? (int) $filters['day'] : null)
-            ->forFocusProblem(isset($filters['focus_problem_id']) ? (int) $filters['focus_problem_id'] : null)
-            ->forExperienceLevel(isset($filters['experience_level_id']) ? (int) $filters['experience_level_id'] : null)
-            ->forModuleChoice(isset($filters['module_choice_id']) ? (int) $filters['module_choice_id'] : null)
-            ->forMeditationType(isset($filters['meditation_type_id']) ? (int) $filters['meditation_type_id'] : null)
-            ->orderedForProgram();
+        $query = $this->scopeWithTaxonomyTitles(
+            $this->scopeSelectResourceColumns($query),
+        );
+
+        if ($activeOnly) {
+            $query = $this->scopeActive($query);
+        }
+
+        $query = $this->scopeForDay($query, self::nullableInt($filters['day'] ?? null));
+        $query = $this->scopeForFocusProblem($query, self::nullableInt($filters['focus_problem_id'] ?? null));
+        $query = $this->scopeForExperienceLevel($query, self::nullableInt($filters['experience_level_id'] ?? null));
+        $query = $this->scopeForModuleChoice($query, self::nullableInt($filters['module_choice_id'] ?? null));
+        $query = $this->scopeForMeditationType($query, self::nullableInt($filters['meditation_type_id'] ?? null));
+
+        return $this->scopeOrderedForProgram($query);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeSelectDayCounts(Builder $query): Builder
     {
         return $query
@@ -346,6 +440,10 @@ class Practice extends Model
             ->groupBy('day');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeSelectAverageDurationMinutesByDay(Builder $query): Builder
     {
         return $query
@@ -354,6 +452,10 @@ class Practice extends Model
             ->groupBy('day');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeSelectMediaReadyCountsByDay(Builder $query): Builder
     {
         return $query
@@ -372,7 +474,7 @@ class Practice extends Model
         return once(fn (): array => static::query()
             ->selectDayCounts()
             ->pluck('total', 'day')
-            ->mapWithKeys(fn (mixed $count, mixed $day): array => [(int) $day => (int) $count])
+            ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
             ->all());
     }
 
@@ -384,7 +486,7 @@ class Practice extends Model
         return once(fn (): array => static::query()
             ->selectAverageDurationMinutesByDay()
             ->pluck('average_minutes', 'day')
-            ->mapWithKeys(fn (mixed $average, mixed $day): array => [(int) $day => (float) $average])
+            ->mapWithKeys(fn (mixed $average, mixed $day): array => self::floatMapEntry($day, $average))
             ->all());
     }
 
@@ -396,7 +498,7 @@ class Practice extends Model
         return once(fn (): array => static::query()
             ->selectMediaReadyCountsByDay()
             ->pluck('total', 'day')
-            ->mapWithKeys(fn (mixed $count, mixed $day): array => [(int) $day => (int) $count])
+            ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
             ->all());
     }
 
@@ -411,24 +513,29 @@ class Practice extends Model
             ->map(function (int $day) use ($counts): array {
                 return [
                     'day' => $day,
-                    'count' => (int) ($counts[$day] ?? 0),
+                    'count' => $counts[$day] ?? 0,
                 ];
             })
             ->all();
     }
 
+    /**
+     * @param  array<string, mixed>  $filters
+     */
     public static function getListTitle(array $filters, string $locale, int $count): string
     {
         $parts = [];
 
-        if ($day = data_get($filters, 'day.value')) {
-            $parts[] = static::formatDay((int) $day);
+        $day = self::nullableInt(data_get($filters, 'day.value'));
+
+        if ($day !== null) {
+            $parts[] = static::formatDay($day);
         }
 
         foreach (self::RELATION_FILTERS as $field => $filter) {
             $label = static::relationFilterIndicator(
                 $field,
-                data_get($filters, "{$field}.value"),
+                self::nullableIntOrString(data_get($filters, "{$field}.value")),
                 $locale,
             );
 
@@ -469,7 +576,7 @@ class Practice extends Model
             return null;
         }
 
-        return static::relationFilterTitles($field, $locale)[(int) $value] ?? null;
+        return self::relationFilterTitles($field, $locale)[(int) $value] ?? null;
     }
 
     public static function relationFilterLabel(string $field): string
@@ -488,6 +595,7 @@ class Practice extends Model
      */
     private static function relationFilterTitles(string $field, string $locale): array
     {
+        /** @var array<string, array<int, string>> $titles */
         static $titles = [];
 
         $cacheKey = "{$field}:{$locale}";
@@ -509,7 +617,7 @@ class Practice extends Model
             ->forFilamentOptions()
             ->get()
             ->mapWithKeys(fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): array => [
-                $record->getKey() => $record->getTitle($locale),
+                $record->id => $record->getTitle($locale),
             ])
             ->all();
     }
@@ -525,7 +633,7 @@ class Practice extends Model
 
             $originalPath = $this->getOriginal($attribute);
 
-            if (filled($originalPath)) {
+            if (is_string($originalPath) && filled($originalPath)) {
                 $paths[] = $originalPath;
             }
         }
@@ -533,12 +641,18 @@ class Practice extends Model
         $this->mediaPathsPendingDeletion = array_values(array_unique($paths));
     }
 
+    /**
+     * @param  array<int, string|null>  $paths
+     */
     private function deleteMediaFiles(array $paths): void
     {
-        collect($paths)
-            ->filter(fn (?string $path): bool => filled($path))
-            ->unique()
-            ->each(fn (string $path) => Storage::disk(self::MEDIA_DISK)->delete($path));
+        foreach (array_unique($paths) as $path) {
+            if (blank($path)) {
+                continue;
+            }
+
+            Storage::disk(self::MEDIA_DISK)->delete($path);
+        }
     }
 
     private function getMediaUrl(?string $path): ?string
@@ -548,5 +662,55 @@ class Practice extends Model
         }
 
         return Storage::disk(self::MEDIA_DISK)->url($path);
+    }
+
+    private static function nullableInt(mixed $value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    private static function nullableIntOrString(mixed $value): int|string|null
+    {
+        if (is_int($value) || is_string($value)) {
+            return blank($value) ? null : $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private static function integerMapEntry(mixed $key, mixed $value): array
+    {
+        if (! is_numeric($key) || ! is_numeric($value)) {
+            return [];
+        }
+
+        return [
+            (int) $key => (int) $value,
+        ];
+    }
+
+    /**
+     * @return array<int, float>
+     */
+    private static function floatMapEntry(mixed $key, mixed $value): array
+    {
+        if (! is_numeric($key) || ! is_numeric($value)) {
+            return [];
+        }
+
+        return [
+            (int) $key => (float) $value,
+        ];
     }
 }

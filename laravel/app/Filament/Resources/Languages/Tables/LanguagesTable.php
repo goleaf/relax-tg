@@ -25,7 +25,9 @@ class LanguagesTable
                     ->view('filament.tables.columns.language-name'),
                 TextColumn::make('native_name')
                     ->label(__('admin.resources.languages.fields.native_name'))
-                    ->state(fn (Language $record): string => $record->native_name ?: Language::nativeName($record->code, $record->name))
+                    ->state(fn (Language $record): string => filled($record->native_name)
+                        ? $record->native_name
+                        : Language::nativeName($record->code, $record->name))
                     ->searchable(['native_name'])
                     ->icon(Heroicon::OutlinedLanguage)
                     ->iconColor('primary'),

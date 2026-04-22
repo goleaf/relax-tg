@@ -2,7 +2,11 @@
 
 namespace App\Actions\Telegram;
 
+use App\Models\ExperienceLevel;
+use App\Models\FocusProblem;
 use App\Models\Language;
+use App\Models\MeditationType;
+use App\Models\ModuleChoice;
 use App\Models\Practice;
 use App\Services\Telegram\TelegramBotService;
 use Illuminate\Support\Str;
@@ -21,14 +25,16 @@ class HandleTelegramUpdateAction
         }
 
         $message = $update->getMessage();
-        $chatId = data_get($update->getChat(), 'id');
-        $text = trim((string) $message->get('text', ''));
+        $chatId = $this->resolveChatId(data_get($update->getChat(), 'id'));
+        $messageText = $message->get('text', '');
+        $text = is_string($messageText) ? trim($messageText) : '';
 
-        if (blank($chatId) || ($text === '')) {
+        if (($chatId === null) || ($text === '')) {
             return;
         }
 
-        $locale = $this->resolveLocale((string) data_get($message->get('from'), 'language_code', ''));
+        $languageCode = data_get($message->get('from'), 'language_code', '');
+        $locale = $this->resolveLocale(is_string($languageCode) ? $languageCode : '');
         $command = $this->normalizeCommand($text);
 
         if ($command === '/start') {
@@ -68,6 +74,15 @@ class HandleTelegramUpdateAction
         $locale = Str::before($languageCode, '-');
 
         return in_array($locale, Language::supportedInterfaceLocales(), true) ? $locale : 'en';
+    }
+
+    private function resolveChatId(mixed $chatId): int|string|null
+    {
+        if (is_int($chatId) || is_string($chatId)) {
+            return blank($chatId) ? null : $chatId;
+        }
+
+        return null;
     }
 
     private function replyWithDayOverview(int|string $chatId, int $day, string $locale): void
@@ -140,9 +155,12 @@ class HandleTelegramUpdateAction
         ])->filter()->implode("\n");
     }
 
-    private function formatRelationLine(string $key, mixed $relation, string $locale): ?string
-    {
-        if (($relation === null) || (! method_exists($relation, 'getTitle'))) {
+    private function formatRelationLine(
+        string $key,
+        FocusProblem|ExperienceLevel|ModuleChoice|MeditationType|null $relation,
+        string $locale,
+    ): ?string {
+        if ($relation === null) {
             return null;
         }
 

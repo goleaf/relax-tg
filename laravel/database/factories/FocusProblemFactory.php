@@ -2,14 +2,18 @@
 
 namespace Database\Factories;
 
+use App\Models\FocusProblem;
 use App\Models\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<FocusProblem>
+ */
 class FocusProblemFactory extends Factory
 {
     public function definition(): array
     {
-        $codes = Language::enabled()->pluck('code')->all();
+        $codes = Language::enabledCodes();
 
         if ($codes === []) {
             $codes = ['en'];

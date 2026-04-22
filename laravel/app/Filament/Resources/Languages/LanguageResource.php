@@ -13,6 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends resource<Language>
+ */
 class LanguageResource extends Resource
 {
     protected static ?string $model = Language::class;
@@ -53,9 +56,12 @@ class LanguageResource extends Resource
         return LanguagesTable::configure($table);
     }
 
+    /**
+     * @return Builder<Language>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return Language::query()
             ->forFilamentIndex();
     }
 

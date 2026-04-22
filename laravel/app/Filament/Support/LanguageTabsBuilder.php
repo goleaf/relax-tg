@@ -3,7 +3,11 @@
 namespace App\Filament\Support;
 
 use App\Models\Language;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Tabs;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Builds Filament Tabs for all enabled languages, sorted alphabetically by name.
@@ -23,7 +27,7 @@ class LanguageTabsBuilder
     /**
      * Build a Tabs component populated with one tab per enabled language.
      *
-     * @param  callable(Language): array<int, mixed>  $fieldFactory  Returns an array of Filament form components for the given language.
+     * @param  callable(Language): array<int, Component|Action|ActionGroup|string|Htmlable>  $fieldFactory  Returns an array of Filament form components for the given language.
      */
     public static function make(callable $fieldFactory): Tabs
     {
@@ -31,11 +35,13 @@ class LanguageTabsBuilder
             ->forEnabledContentTabs()
             ->get();
 
-        $tabs = $languages->map(function (Language $language) use ($fieldFactory) {
-            return Tabs\Tab::make($language->code)
+        $tabs = [];
+
+        foreach ($languages as $language) {
+            $tabs[] = Tabs\Tab::make($language->code)
                 ->label(Language::displayName($language->code))
                 ->schema($fieldFactory($language));
-        })->toArray();
+        }
 
         return Tabs::make(__('admin.resources.languages.navigation'))
             ->tabs($tabs)

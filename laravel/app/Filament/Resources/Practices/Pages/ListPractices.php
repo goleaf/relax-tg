@@ -17,7 +17,7 @@ class ListPractices extends ListRecords
         return [
             CreateAction::make()
                 ->url(fn () => PracticeResource::getUrl('create', [
-                    'filters' => $this->tableFilters,
+                    'filters' => $this->currentTableFilters(),
                 ])),
         ];
     }
@@ -32,6 +32,14 @@ class ListPractices extends ListRecords
 
         $count = (clone $filteredTableQuery)->count();
 
-        return Practice::getListTitle($this->tableFilters ?? [], app()->getLocale(), $count);
+        return Practice::getListTitle($this->currentTableFilters(), app()->getLocale(), $count);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function currentTableFilters(): array
+    {
+        return $this->tableFilters ?? [];
     }
 }

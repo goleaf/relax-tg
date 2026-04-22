@@ -29,7 +29,7 @@ class SyncTelegramWebhookCommand extends Command
                 return self::SUCCESS;
             }
 
-            if (! $telegramBotService->syncWebhook((bool) $this->option('drop-pending-updates'))) {
+            if (! $telegramBotService->syncWebhook($this->option('drop-pending-updates'))) {
                 $this->error('Telegram webhook sync failed.');
 
                 return self::FAILURE;

@@ -22,7 +22,7 @@ class PracticeFactory extends Factory
      */
     public function definition(): array
     {
-        $codes = Language::enabled()->pluck('code')->all();
+        $codes = Language::enabledCodes();
 
         if ($codes === []) {
             $codes = ['en'];

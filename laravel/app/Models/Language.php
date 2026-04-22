@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $native_name
+ * @property bool $is_enabled
+ */
 class Language extends Model
 {
     /** @use HasFactory<LanguageFactory> */
@@ -29,11 +36,19 @@ class Language extends Model
         'is_enabled' => 'boolean',
     ];
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeEnabled(Builder $query): Builder
     {
         return $query->where('is_enabled', true);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForFilamentIndex(Builder $query): Builder
     {
         return $query->select([
@@ -45,11 +60,21 @@ class Language extends Model
         ]);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForEnabledContentTabs(Builder $query): Builder
     {
         return $query
-            ->forFilamentIndex()
-            ->enabled()
+            ->select([
+                'id',
+                'code',
+                'name',
+                'native_name',
+                'is_enabled',
+            ])
+            ->where('is_enabled', true)
             ->orderBy('name')
             ->orderBy('code');
     }
@@ -64,7 +89,9 @@ class Language extends Model
 
     public static function nativeName(string $code, ?string $fallback = null): string
     {
-        return config("language_native_names.{$code}", $fallback ?? Str::upper($code));
+        $nativeName = config("language_native_names.{$code}", $fallback ?? Str::upper($code));
+
+        return is_string($nativeName) ? $nativeName : ($fallback ?? Str::upper($code));
     }
 
     public static function displayName(string $code, ?string $locale = null): string
@@ -74,12 +101,27 @@ class Language extends Model
         if (function_exists('locale_get_display_name')) {
             $displayName = locale_get_display_name($code, $locale);
 
-            if (filled($displayName)) {
+            if (is_string($displayName) && filled($displayName)) {
                 return Str::of($displayName)->title()->toString();
             }
         }
 
-        return config("languages.{$code}", Str::upper($code));
+        $language = config("languages.{$code}", Str::upper($code));
+
+        return is_string($language) ? $language : Str::upper($code);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function enabledCodes(): array
+    {
+        return array_values(static::query()
+            ->enabled()
+            ->pluck('code')
+            ->filter(fn (mixed $code): bool => is_string($code) && ($code !== ''))
+            ->values()
+            ->all());
     }
 
     public function flagIcon(): string

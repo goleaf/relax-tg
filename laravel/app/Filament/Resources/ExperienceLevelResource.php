@@ -20,6 +20,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends resource<ExperienceLevel>
+ */
 class ExperienceLevelResource extends Resource
 {
     protected static ?string $model = ExperienceLevel::class;
@@ -99,9 +102,12 @@ class ExperienceLevelResource extends Resource
             ]);
     }
 
+    /**
+     * @return Builder<ExperienceLevel>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        return ExperienceLevel::query()
             ->forFilamentIndex();
     }
 

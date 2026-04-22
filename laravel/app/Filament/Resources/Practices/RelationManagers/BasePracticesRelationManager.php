@@ -4,6 +4,10 @@ namespace App\Filament\Resources\Practices\RelationManagers;
 
 use App\Filament\Resources\Practices\Schemas\PracticeForm;
 use App\Filament\Resources\Practices\Tables\PracticesTable;
+use App\Models\ExperienceLevel;
+use App\Models\FocusProblem;
+use App\Models\MeditationType;
+use App\Models\ModuleChoice;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -44,8 +48,18 @@ abstract class BasePracticesRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        $count = $ownerRecord->practices_count
-            ?? $ownerRecord->loadCount('practices')->practices_count;
+        if (! $ownerRecord instanceof FocusProblem
+            && ! $ownerRecord instanceof ExperienceLevel
+            && ! $ownerRecord instanceof ModuleChoice
+            && ! $ownerRecord instanceof MeditationType) {
+            return null;
+        }
+
+        if ($ownerRecord->practices_count === null) {
+            $ownerRecord->loadCount('practices');
+        }
+
+        $count = $ownerRecord->practices_count ?? 0;
 
         return (string) $count;
     }
