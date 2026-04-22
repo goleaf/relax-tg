@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'telegram' => [
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'internal_api_token' => env('TELEGRAM_INTERNAL_API_TOKEN'),
+    ],
+
 ];

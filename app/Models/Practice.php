@@ -229,6 +229,18 @@ class Practice extends Model
         return $query->orderBy('id', 'desc');
     }
 
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeOrderedForProgram(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('day')
+            ->orderBy('id');
+    }
+
     public function scopeForDay(Builder $query, ?int $day): Builder
     {
         return $query->when(filled($day), fn (Builder $query) => $query->where('day', $day));

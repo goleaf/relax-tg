@@ -6,6 +6,9 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "telegram": {
+            "command": "./bin/mcp-telegram"
         }
     }
 }

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+env_file="${project_root}/.env"
+
+if [[ -f "${env_file}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${env_file}"
+    set +a
+fi
+
+if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
+    printf 'TELEGRAM_BOT_TOKEN is not set in %s or the current shell environment.\n' "${env_file}" >&2
+    exit 1
+fi
+
+export SAMPLING_ENABLED=false
+
+exec npx -y @iqai/mcp-telegram

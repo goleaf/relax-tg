@@ -11,6 +11,7 @@ use App\Models\MeditationType;
 use App\Models\ModuleChoice;
 use App\Models\Practice;
 use App\Models\User;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -22,6 +23,18 @@ beforeEach(function () {
 
     Language::query()->create(['code' => 'en', 'name' => 'English', 'is_enabled' => true]);
     Language::query()->create(['code' => 'ru', 'name' => 'Russian', 'is_enabled' => true]);
+});
+
+test('content translation fields remain driven by enabled languages independently from interface locales', function () {
+    Language::query()->create(['code' => 'fr', 'name' => 'French', 'is_enabled' => true]);
+
+    expect(LanguageSwitch::make()->getLocales())->toBe(['en', 'ru']);
+
+    Livewire::test(CreatePractice::class)
+        ->assertFormFieldExists('title.en')
+        ->assertFormFieldExists('title.ru')
+        ->assertFormFieldExists('title.fr')
+        ->assertFormFieldExists('description.fr');
 });
 
 test('can render practice list page', function () {

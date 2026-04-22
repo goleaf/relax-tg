@@ -4,6 +4,7 @@ use App\Filament\Resources\Languages\LanguageResource;
 use App\Filament\Resources\Languages\Pages\ListLanguages;
 use App\Models\Language;
 use App\Models\User;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -36,6 +37,7 @@ test('can filter languages by active tab', function () {
 test('language resource uses russian translations when the selected filament locale is russian', function () {
     Language::query()->create(['code' => 'en', 'name' => 'English', 'is_enabled' => true]);
     Language::query()->create(['code' => 'ru', 'name' => 'Russian', 'is_enabled' => true]);
+    Language::query()->create(['code' => 'fr', 'name' => 'French', 'is_enabled' => true]);
 
     $this->withSession(['locale' => 'ru'])
         ->get(LanguageResource::getUrl('index'))
@@ -44,5 +46,14 @@ test('language resource uses russian translations when the selected filament loc
         ->assertSeeText('Все языки')
         ->assertSeeText('Включенные')
         ->assertSeeText('Английский')
-        ->assertSeeText('Русский');
+        ->assertSeeText('Русский')
+        ->assertSeeText('Французский');
+});
+
+test('filament interface switch stays limited to english and russian', function () {
+    Language::query()->create(['code' => 'en', 'name' => 'English', 'is_enabled' => true]);
+    Language::query()->create(['code' => 'ru', 'name' => 'Russian', 'is_enabled' => true]);
+    Language::query()->create(['code' => 'fr', 'name' => 'French', 'is_enabled' => true]);
+
+    expect(LanguageSwitch::make()->getLocales())->toBe(['en', 'ru']);
 });
