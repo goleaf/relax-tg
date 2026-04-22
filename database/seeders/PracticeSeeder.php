@@ -8,9 +8,20 @@ use App\Models\MeditationType;
 use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class PracticeSeeder extends Seeder
 {
+    private const IMAGE_WIDTH = 640;
+
+    private const IMAGE_HEIGHT = 480;
+
+    private const VIDEO_DURATION_SECONDS = 3;
+
+    private const VIDEO_FRAME_RATE = 30;
+
     private const FOCUS_PROBLEMS = [
         ['en' => 'Anxiety', 'ru' => 'Тревога'],
         ['en' => 'Fatigue', 'ru' => 'Усталость'],
@@ -443,6 +454,7 @@ class PracticeSeeder extends Seeder
 
         foreach (range(1, count(self::DAY_GUIDES)) as $day) {
             $dayGuide = self::DAY_GUIDES[$day];
+            $mediaPaths = $this->ensureMediaPathsForDay($day, $dayGuide);
 
             foreach ($focusProblems as $focusProblem) {
                 foreach ($experienceLevels as $experienceLevel) {
@@ -455,6 +467,8 @@ class PracticeSeeder extends Seeder
                                 experienceLevel: $experienceLevel,
                                 moduleChoice: $moduleChoice,
                                 meditationType: $meditationType,
+                                imagePath: $mediaPaths['image_path'],
+                                videoPath: $mediaPaths['video_path'],
                             );
                         }
                     }
@@ -498,6 +512,8 @@ class PracticeSeeder extends Seeder
         ExperienceLevel $experienceLevel,
         ModuleChoice $moduleChoice,
         MeditationType $meditationType,
+        string $imagePath,
+        string $videoPath,
     ): void {
         Practice::query()->updateOrCreate(
             [
@@ -509,8 +525,8 @@ class PracticeSeeder extends Seeder
             ],
             [
                 'duration' => $dayGuide['duration'],
-                'image_path' => null,
-                'video_path' => null,
+                'image_path' => $imagePath,
+                'video_path' => $videoPath,
                 'is_active' => true,
                 'title' => $this->buildPracticeTitle(
                     $day,
@@ -528,6 +544,151 @@ class PracticeSeeder extends Seeder
                     $meditationType,
                 ),
             ],
+        );
+    }
+
+    /**
+     * @param  array{slug: string}  $dayGuide
+     * @return array{image_path: string, video_path: string}
+     */
+    private function ensureMediaPathsForDay(int $day, array $dayGuide): array
+    {
+        $filename = sprintf('day-%02d-%s', $day, $dayGuide['slug']);
+
+        $imagePath = self::seedImageDirectory()."/{$filename}.jpg";
+        $videoPath = self::seedVideoDirectory()."/{$filename}.mp4";
+
+        $this->ensureImageExists($imagePath, $day);
+        $this->ensureVideoExists($videoPath, $day);
+
+        return [
+            'image_path' => $imagePath,
+            'video_path' => $videoPath,
+        ];
+    }
+
+    private function ensureImageExists(string $relativePath, int $day): void
+    {
+        $disk = Storage::disk(Practice::mediaDisk());
+
+        if ($disk->exists($relativePath)) {
+            return;
+        }
+
+        $disk->makeDirectory(dirname($relativePath));
+
+        $result = Process::path(base_path())
+            ->timeout(120)
+            ->run([
+                'ffmpeg',
+                '-y',
+                '-f',
+                'lavfi',
+                '-i',
+                $this->imageFilter($day),
+                '-frames:v',
+                '1',
+                '-update',
+                '1',
+                '-q:v',
+                '2',
+                $disk->path($relativePath),
+            ]);
+
+        $this->ensureProcessSucceeded($result->successful(), 'image', $relativePath, $result->errorOutput());
+    }
+
+    private function ensureVideoExists(string $relativePath, int $day): void
+    {
+        $disk = Storage::disk(Practice::mediaDisk());
+
+        if ($disk->exists($relativePath)) {
+            return;
+        }
+
+        $disk->makeDirectory(dirname($relativePath));
+
+        $result = Process::path(base_path())
+            ->timeout(120)
+            ->run([
+                'ffmpeg',
+                '-y',
+                '-f',
+                'lavfi',
+                '-i',
+                $this->videoFilter($day),
+                '-t',
+                (string) self::VIDEO_DURATION_SECONDS,
+                '-c:v',
+                'libx264',
+                '-pix_fmt',
+                'yuv420p',
+                '-movflags',
+                '+faststart',
+                $disk->path($relativePath),
+            ]);
+
+        $this->ensureProcessSucceeded($result->successful(), 'video', $relativePath, $result->errorOutput());
+    }
+
+    private function imageFilter(int $day): string
+    {
+        return sprintf(
+            'testsrc2=size=%dx%d:rate=1,noise=alls=%d:allf=t+u,hue=h=%d',
+            self::IMAGE_WIDTH,
+            self::IMAGE_HEIGHT,
+            $this->noiseAmount($day),
+            $this->hueRotation($day),
+        );
+    }
+
+    private function videoFilter(int $day): string
+    {
+        return sprintf(
+            'testsrc2=size=%dx%d:rate=%d,noise=alls=%d:allf=t+u,hue=h=%d',
+            self::IMAGE_WIDTH,
+            self::IMAGE_HEIGHT,
+            self::VIDEO_FRAME_RATE,
+            $this->noiseAmount($day),
+            $this->hueRotation($day),
+        );
+    }
+
+    private function noiseAmount(int $day): int
+    {
+        return 12 + (($day - 1) % 6 * 3);
+    }
+
+    private function hueRotation(int $day): int
+    {
+        return ($day * 17) % 360;
+    }
+
+    private static function seedImageDirectory(): string
+    {
+        return Practice::imageDirectory().'/seeded';
+    }
+
+    private static function seedVideoDirectory(): string
+    {
+        return Practice::videoDirectory().'/seeded';
+    }
+
+    private function ensureProcessSucceeded(
+        bool $successful,
+        string $mediaType,
+        string $relativePath,
+        string $errorOutput,
+    ): void {
+        if ($successful) {
+            return;
+        }
+
+        $message = trim($errorOutput);
+
+        throw new RuntimeException(
+            "Unable to generate practice seed {$mediaType} [{$relativePath}] via ffmpeg."
+            .($message !== '' ? " {$message}" : ''),
         );
     }
 

@@ -25,7 +25,25 @@ class ModuleChoiceResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Categories';
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.module_choices.model');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.module_choices.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.resources.module_choices.navigation');
+    }
+
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin.navigation_groups.categories');
+    }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
@@ -40,12 +58,12 @@ class ModuleChoiceResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Translations')
+                Section::make(__('admin.resources.module_choices.sections.translations'))
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
-                                    ->label('Title')
+                                    ->label(__('admin.resources.module_choices.fields.title'))
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -60,7 +78,7 @@ class ModuleChoiceResource extends Resource
             ->defaultSort('id')
             ->columns([
                 TextColumn::make(ModuleChoice::titleAttribute())
-                    ->label('Title')
+                    ->label(__('admin.resources.module_choices.fields.title'))
                     ->searchable()
                     ->sortable(),
             ])

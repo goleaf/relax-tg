@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Languages\Pages;
 
 use App\Filament\Resources\Languages\LanguageResource;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListLanguages extends ListRecords
@@ -20,10 +21,10 @@ class ListLanguages extends ListRecords
     public function getTabs(): array
     {
         return [
-            'all' => \Filament\Schemas\Components\Tabs\Tab::make('All Languages'),
-            'enabled' => \Filament\Schemas\Components\Tabs\Tab::make('Enabled')
+            'all' => Tab::make(__('admin.resources.languages.tabs.all')),
+            'enabled' => Tab::make(__('admin.resources.languages.tabs.enabled'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('is_enabled', true)),
-            'disabled' => \Filament\Schemas\Components\Tabs\Tab::make('Disabled')
+            'disabled' => Tab::make(__('admin.resources.languages.tabs.disabled'))
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('is_enabled', false)),
         ];
     }

@@ -24,9 +24,27 @@ class PracticeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Content';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.practices.model');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.practices.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.resources.practices.navigation');
+    }
+
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin.navigation_groups.content');
+    }
 
     public static function getNavigationItems(): array
     {
@@ -35,7 +53,7 @@ class PracticeResource extends Resource
                 $day = $dayData['day'];
 
                 return NavigationItem::make(Practice::formatDay($day)." ({$dayData['count']})")
-                    ->group('Daily Practices')
+                    ->group(__('admin.navigation_groups.daily_practices'))
                     ->icon(static::getNavigationIcon())
                     ->sort($day)
                     ->isActiveWhen(fn (): bool => static::isDayNavigationItemActive($day))

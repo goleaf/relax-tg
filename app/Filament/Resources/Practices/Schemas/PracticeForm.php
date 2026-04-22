@@ -24,49 +24,50 @@ class PracticeForm
     {
         return $schema
             ->components([
-                Section::make('General')
+                Section::make(__('admin.resources.practices.sections.general'))
                     ->schema([
                         Select::make('day')
-                            ->options(Practice::dayOptions())
+                            ->label(__('admin.resources.practices.fields.day'))
+                            ->options(fn (): array => Practice::dayOptionsWithCounts())
                             ->required()
                             ->default(fn () => data_get(request()->query('filters', []), 'day.value')),
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label(__('admin.resources.practices.fields.is_active'))
                             ->default(true),
                     ])->columns(2),
 
-                Section::make('Categorization')
+                Section::make(__('admin.resources.practices.sections.categorization'))
                     ->schema(array_values(array_filter([
                         static::taxonomySelect(
                             field: 'focus_problem_id',
-                            label: 'Focus Problem',
+                            label: __('admin.resources.practices.fields.focus_problem'),
                             relationship: 'focusProblem',
                             hidden: in_array('focus_problem_id', $hiddenFields, true),
                         ),
                         static::taxonomySelect(
                             field: 'experience_level_id',
-                            label: 'Experience Level',
+                            label: __('admin.resources.practices.fields.experience_level'),
                             relationship: 'experienceLevel',
                             hidden: in_array('experience_level_id', $hiddenFields, true),
                         ),
                         static::taxonomySelect(
                             field: 'module_choice_id',
-                            label: 'Module Choice',
+                            label: __('admin.resources.practices.fields.module_choice'),
                             relationship: 'moduleChoice',
                             hidden: in_array('module_choice_id', $hiddenFields, true),
                         ),
                         static::taxonomySelect(
                             field: 'meditation_type_id',
-                            label: 'Meditation Type',
+                            label: __('admin.resources.practices.fields.meditation_type'),
                             relationship: 'meditationType',
                             hidden: in_array('meditation_type_id', $hiddenFields, true),
                         ),
                     ], fn (mixed $component): bool => $component !== null)))->columns(2),
 
-                Section::make('Media & Duration')
+                Section::make(__('admin.resources.practices.sections.media'))
                     ->schema([
                         TextInput::make('duration')
-                            ->label('Duration (seconds)')
+                            ->label(__('admin.resources.practices.fields.duration'))
                             ->numeric()
                             ->required()
                             ->minValue(0)
@@ -75,17 +76,17 @@ class PracticeForm
                         static::videoUpload(),
                     ])->columns(1),
 
-                Section::make('Translations')
+                Section::make(__('admin.resources.practices.sections.translations'))
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
-                                    ->label('Title')
+                                    ->label(__('admin.resources.practices.fields.title'))
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpanFull(),
                                 Textarea::make("description.{$language->code}")
-                                    ->label('Description')
+                                    ->label(__('admin.resources.practices.fields.description'))
                                     ->rows(6)
                                     ->columnSpanFull(),
                             ];
@@ -110,10 +111,15 @@ class PracticeForm
             ->relationship(
                 $relationship,
                 'id',
-                fn (Builder $query) => $query->forFilamentOptions(),
+                fn (Builder $query) => $query
+                    ->forFilamentOptions()
+                    ->withCount('practices'),
             )
             ->getOptionLabelFromRecordUsing(
-                fn ($record): string => $record->getTitle(app()->getLocale()),
+                fn ($record): string => Practice::formatCountedLabel(
+                    $record->getTitle(app()->getLocale()),
+                    (int) $record->practices_count,
+                ),
             )
             ->searchable()
             ->preload()
@@ -124,7 +130,7 @@ class PracticeForm
     private static function imageUpload(): FileUpload
     {
         return FileUpload::make('image_path')
-            ->label('Image')
+            ->label(__('admin.resources.practices.fields.image'))
             ->disk(Practice::mediaDisk())
             ->directory(Practice::imageDirectory())
             ->visibility('public')
@@ -143,7 +149,7 @@ class PracticeForm
     private static function videoUpload(): FileUpload
     {
         return FileUpload::make('video_path')
-            ->label('Video File')
+            ->label(__('admin.resources.practices.fields.video'))
             ->disk(Practice::mediaDisk())
             ->directory(Practice::videoDirectory())
             ->visibility('public')

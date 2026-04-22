@@ -25,7 +25,25 @@ class ExperienceLevelResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Categories';
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.experience_levels.model');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.experience_levels.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.resources.experience_levels.navigation');
+    }
+
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin.navigation_groups.categories');
+    }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
@@ -40,12 +58,12 @@ class ExperienceLevelResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Translations')
+                Section::make(__('admin.resources.experience_levels.sections.translations'))
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
-                                    ->label('Title')
+                                    ->label(__('admin.resources.experience_levels.fields.title'))
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -60,7 +78,7 @@ class ExperienceLevelResource extends Resource
             ->defaultSort('id')
             ->columns([
                 TextColumn::make(ExperienceLevel::titleAttribute())
-                    ->label('Title')
+                    ->label(__('admin.resources.experience_levels.fields.title'))
                     ->searchable()
                     ->sortable(),
             ])

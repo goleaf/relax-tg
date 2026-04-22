@@ -50,13 +50,13 @@ class Practice extends Model
     ];
 
     /**
-     * @var array<string, array{model: class-string<FocusProblem|ExperienceLevel|ModuleChoice|MeditationType>, label: string}>
+     * @var array<string, array{model: class-string<FocusProblem|ExperienceLevel|ModuleChoice|MeditationType>, label_key: string}>
      */
     private const RELATION_FILTERS = [
-        'focus_problem_id' => ['model' => FocusProblem::class, 'label' => 'Focus'],
-        'experience_level_id' => ['model' => ExperienceLevel::class, 'label' => 'Level'],
-        'module_choice_id' => ['model' => ModuleChoice::class, 'label' => 'Module'],
-        'meditation_type_id' => ['model' => MeditationType::class, 'label' => 'Type'],
+        'focus_problem_id' => ['model' => FocusProblem::class, 'label_key' => 'focus_problem'],
+        'experience_level_id' => ['model' => ExperienceLevel::class, 'label_key' => 'experience_level'],
+        'module_choice_id' => ['model' => ModuleChoice::class, 'label_key' => 'module_choice'],
+        'meditation_type_id' => ['model' => MeditationType::class, 'label_key' => 'meditation_type'],
     ];
 
     /**
@@ -146,7 +146,7 @@ class Practice extends Model
 
     public static function formatDay(int $day): string
     {
-        return "{$day} Day";
+        return __('admin.resources.practices.values.day', ['day' => $day]);
     }
 
     public static function formatDuration(int $duration): string
@@ -339,12 +339,10 @@ class Practice extends Model
         }
 
         foreach (self::RELATION_FILTERS as $field => $filter) {
-            $label = static::resolveFilterLabel(
-                $filters,
+            $label = static::relationFilterIndicator(
                 $field,
-                $filter['model'],
+                data_get($filters, "{$field}.value"),
                 $locale,
-                $filter['label'],
             );
 
             if ($label !== null) {
@@ -352,29 +350,42 @@ class Practice extends Model
             }
         }
 
-        $baseTitle = $parts === [] ? 'Practices' : implode(' / ', $parts);
+        $baseTitle = $parts === [] ? __('admin.resources.practices.navigation') : implode(' / ', $parts);
 
         return "{$baseTitle} ({$count})";
     }
 
-    /**
-     * @param  class-string<FocusProblem|ExperienceLevel|ModuleChoice|MeditationType>  $modelClass
-     */
-    private static function resolveFilterLabel(
-        array $filters,
+    public static function relationFilterIndicator(
         string $field,
-        string $modelClass,
+        int|string|null $value,
         string $locale,
-        string $prefix,
+        ?string $prefix = null,
     ): ?string {
-        $value = data_get($filters, "{$field}.value");
+        $title = static::relationFilterTitle($field, $value, $locale);
 
-        if (blank($value)) {
+        if ($title === null) {
+            return null;
+        }
+
+        return __('admin.resources.practices.filters.indicator', [
+            'label' => $prefix ?? static::relationFilterLabel($field),
+            'value' => $title,
+        ]);
+    }
+
+    public static function relationFilterTitle(
+        string $field,
+        int|string|null $value,
+        string $locale,
+    ): ?string {
+        $filter = self::RELATION_FILTERS[$field] ?? null;
+
+        if (($filter === null) || blank($value)) {
             return null;
         }
 
         /** @var FocusProblem|ExperienceLevel|ModuleChoice|MeditationType|null $record */
-        $record = $modelClass::query()
+        $record = $filter['model']::query()
             ->forFilamentOptions()
             ->find($value);
 
@@ -382,7 +393,18 @@ class Practice extends Model
             return null;
         }
 
-        return "{$prefix}: {$record->getTitle($locale)}";
+        return $record->getTitle($locale);
+    }
+
+    public static function relationFilterLabel(string $field): string
+    {
+        $filter = self::RELATION_FILTERS[$field] ?? null;
+
+        if ($filter === null) {
+            return $field;
+        }
+
+        return __("admin.resources.practices.short_labels.{$filter['label_key']}");
     }
 
     private function captureMediaPathsPendingDeletion(): void

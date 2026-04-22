@@ -16,9 +16,12 @@ abstract class BasePracticesRelationManager extends RelationManager
 
     protected static bool $isLazy = false;
 
-    protected static ?string $title = 'Practices';
-
     abstract protected static function getOwnerForeignKey(): string;
+
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('admin.relation_managers.practices');
+    }
 
     public function form(Schema $schema): Schema
     {

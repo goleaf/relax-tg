@@ -33,7 +33,7 @@ class LanguageTabsBuilder
 
         $tabs = $languages->map(function (Language $language) use ($fieldFactory) {
             return Tabs\Tab::make($language->code)
-                ->label($language->name)
+                ->label(Language::displayName($language->code))
                 ->schema($fieldFactory($language));
         })->toArray();
 

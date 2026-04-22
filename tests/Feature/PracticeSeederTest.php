@@ -8,6 +8,11 @@ use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Database\Seeders\LanguageSeeder;
 use Database\Seeders\PracticeSeeder;
+use Illuminate\Support\Facades\Process;
+
+beforeEach(function () {
+    Process::fake();
+});
 
 test('practice seeder creates every category combination for each day', function () {
     $this->seed([
@@ -39,10 +44,14 @@ test('practice seeder creates translated day content for every day', function ()
         ->firstOrFail();
 
     expect(Language::enabled()->pluck('code')->sort()->values()->all())->toBe(['en', 'ru'])
+        ->and($firstPractice->image_path)->toEndWith('.jpg')
+        ->and($firstPractice->video_path)->toEndWith('.mp4')
         ->and($firstPractice->title['en'])->toStartWith('Day 1: Arrive With One Breath')
         ->and($firstPractice->title['ru'])->toStartWith('День 1: Вернуться одним дыханием')
         ->and($firstPractice->description['en'])->toContain('Best for')
         ->and($firstPractice->description['ru'])->toContain('Подходит для темы')
+        ->and($lastPractice->image_path)->toEndWith('.jpg')
+        ->and($lastPractice->video_path)->toEndWith('.mp4')
         ->and($lastPractice->title['en'])->toStartWith('Day 29: Build Your Ongoing Practice')
         ->and($lastPractice->title['ru'])->toStartWith('День 29: Собрать свою постоянную практику')
         ->and($lastPractice->description['en'])->toContain('consistently')

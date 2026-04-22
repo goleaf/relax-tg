@@ -25,7 +25,25 @@ class FocusProblemResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Categories';
+    public static function getModelLabel(): string
+    {
+        return __('admin.resources.focus_problems.model');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.resources.focus_problems.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.resources.focus_problems.navigation');
+    }
+
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin.navigation_groups.categories');
+    }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
@@ -40,12 +58,12 @@ class FocusProblemResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Translations')
+                Section::make(__('admin.resources.focus_problems.sections.translations'))
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
                             return [
                                 TextInput::make("title.{$language->code}")
-                                    ->label('Title')
+                                    ->label(__('admin.resources.focus_problems.fields.title'))
                                     ->required()
                                     ->maxLength(255),
                             ];
@@ -60,7 +78,7 @@ class FocusProblemResource extends Resource
             ->defaultSort('id')
             ->columns([
                 TextColumn::make(FocusProblem::titleAttribute())
-                    ->label('Title')
+                    ->label(__('admin.resources.focus_problems.fields.title'))
                     ->searchable()
                     ->sortable(),
             ])

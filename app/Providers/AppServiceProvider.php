@@ -29,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
                 ? Language::enabled()->pluck('code')->toArray()
                 : ['en'];
 
-            $switch->locales($locales);
+            $switch
+                ->locales($locales)
+                ->displayLocale(fn (): string => app()->getLocale());
         });
     }
 }

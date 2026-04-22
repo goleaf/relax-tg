@@ -36,7 +36,7 @@ test('can list practices', function () {
         ->assertCanSeeTableRecords($practices);
 });
 
-test('practice list uses inline live filters with day first and keeps description hidden', function () {
+test('practice list uses inline live filters and hides media and created columns', function () {
     $practice = Practice::factory()->create();
 
     $component = Livewire::test(ListPractices::class)
@@ -47,9 +47,9 @@ test('practice list uses inline live filters with day first and keeps descriptio
         ->assertTableFilterExists('module_choice_id')
         ->assertTableFilterExists('meditation_type_id')
         ->assertTableColumnExists('description.en', fn ($column): bool => $column->isHidden())
-        ->assertTableColumnExists('image_path', fn ($column): bool => ! $column->isToggleable())
-        ->assertTableColumnExists('video_path', fn ($column): bool => ! $column->isToggleable())
-        ->assertTableColumnExists('created_at', fn ($column): bool => ! $column->isToggleable());
+        ->assertTableColumnDoesNotExist('image_path')
+        ->assertTableColumnDoesNotExist('video_path')
+        ->assertTableColumnDoesNotExist('created_at');
 
     expect($component->instance()->getTable()->getFiltersLayout())->toBe(FiltersLayout::AboveContent)
         ->and($component->instance()->getTable()->hasDeferredFilters())->toBeFalse()
@@ -125,14 +125,263 @@ test('practice list filters show option counts in dropdown labels', function () 
         'meditation_type_id' => $meditationType->id,
     ]);
 
-    $component = Livewire::test(ListPractices::class);
-    $dayOptions = $component->instance()->getTable()->getFilter('day')->getFormField()->getOptions();
-    $focusProblemOptions = $component->instance()->getTable()->getFilter('focus_problem_id')->getFormField()->getOptions();
+    $table = Livewire::test(ListPractices::class)
+        ->instance()
+        ->getTable();
 
-    expect($dayOptions[1])->toBe('1 Day (2)')
-        ->and($dayOptions[2])->toBe('2 Day (1)')
+    $focusProblemOptions = $table
+        ->getFilter('focus_problem_id')
+        ->getRelationshipQuery()
+        ->get()
+        ->mapWithKeys(fn (FocusProblem $record): array => [
+            $record->getKey() => Practice::formatCountedLabel(
+                $record->getTitle(app()->getLocale()),
+                (int) $record->practices_count,
+            ),
+        ])
+        ->all();
+
+    expect($table->getFilter('day')->getOptions())->toMatchArray([
+        1 => '1 Day (2)',
+        2 => '2 Day (1)',
+    ])
+        ->and(array_keys($table->getFilters()))->toBe([
+            'day',
+            'focus_problem_id',
+            'experience_level_id',
+            'module_choice_id',
+            'meditation_type_id',
+        ])
         ->and($focusProblemOptions[$focusProblem->id])->toBe('Anxiety (2)')
         ->and($focusProblemOptions[$otherFocusProblem->id])->toBe('Fatigue (1)');
+});
+
+test('practice list filter counts reflect active filters while excluding the current dropdown filter', function () {
+    $focusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Anxiety', 'ru' => 'Тревога'],
+    ]);
+    $otherFocusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Fatigue', 'ru' => 'Усталость'],
+    ]);
+    $experienceLevel = ExperienceLevel::factory()->create([
+        'title' => ['en' => 'Beginner', 'ru' => 'Новичок'],
+    ]);
+    $otherExperienceLevel = ExperienceLevel::factory()->create([
+        'title' => ['en' => 'Advanced', 'ru' => 'Продвинутый'],
+    ]);
+    $moduleChoice = ModuleChoice::factory()->create([
+        'title' => ['en' => 'Main', 'ru' => 'Главный'],
+    ]);
+    $otherModuleChoice = ModuleChoice::factory()->create([
+        'title' => ['en' => 'Nutrition', 'ru' => 'Питание'],
+    ]);
+    $meditationType = MeditationType::factory()->create([
+        'title' => ['en' => 'Breath', 'ru' => 'Дыхание'],
+    ]);
+    $otherMeditationType = MeditationType::factory()->create([
+        'title' => ['en' => 'Body', 'ru' => 'Тело'],
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 23,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $otherFocusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $otherExperienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $otherModuleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $otherMeditationType->id,
+    ]);
+
+    $component = Livewire::test(ListPractices::class)
+        ->filterTable('day', 22)
+        ->filterTable('focus_problem_id', $focusProblem->id)
+        ->filterTable('experience_level_id', $experienceLevel->id)
+        ->filterTable('module_choice_id', $moduleChoice->id)
+        ->filterTable('meditation_type_id', $meditationType->id);
+
+    $table = $component->instance()->getTable();
+
+    $focusProblemOptions = $table
+        ->getFilter('focus_problem_id')
+        ->getRelationshipQuery()
+        ->get()
+        ->mapWithKeys(fn (FocusProblem $record): array => [
+            $record->getKey() => Practice::formatCountedLabel(
+                $record->getTitle(app()->getLocale()),
+                (int) $record->practices_count,
+            ),
+        ])
+        ->all();
+
+    $experienceLevelOptions = $table
+        ->getFilter('experience_level_id')
+        ->getRelationshipQuery()
+        ->get()
+        ->mapWithKeys(fn (ExperienceLevel $record): array => [
+            $record->getKey() => Practice::formatCountedLabel(
+                $record->getTitle(app()->getLocale()),
+                (int) $record->practices_count,
+            ),
+        ])
+        ->all();
+
+    $moduleChoiceOptions = $table
+        ->getFilter('module_choice_id')
+        ->getRelationshipQuery()
+        ->get()
+        ->mapWithKeys(fn (ModuleChoice $record): array => [
+            $record->getKey() => Practice::formatCountedLabel(
+                $record->getTitle(app()->getLocale()),
+                (int) $record->practices_count,
+            ),
+        ])
+        ->all();
+
+    $meditationTypeOptions = $table
+        ->getFilter('meditation_type_id')
+        ->getRelationshipQuery()
+        ->get()
+        ->mapWithKeys(fn (MeditationType $record): array => [
+            $record->getKey() => Practice::formatCountedLabel(
+                $record->getTitle(app()->getLocale()),
+                (int) $record->practices_count,
+            ),
+        ])
+        ->all();
+
+    expect($table->getFilter('day')->getOptions())->toMatchArray([
+        22 => '22 Day (1)',
+        23 => '23 Day (1)',
+    ])
+        ->and($focusProblemOptions[$focusProblem->id])->toBe('Anxiety (1)')
+        ->and($focusProblemOptions[$otherFocusProblem->id])->toBe('Fatigue (1)')
+        ->and($experienceLevelOptions[$experienceLevel->id])->toBe('Beginner (1)')
+        ->and($experienceLevelOptions[$otherExperienceLevel->id])->toBe('Advanced (1)')
+        ->and($moduleChoiceOptions[$moduleChoice->id])->toBe('Main (1)')
+        ->and($moduleChoiceOptions[$otherModuleChoice->id])->toBe('Nutrition (1)')
+        ->and($meditationTypeOptions[$meditationType->id])->toBe('Breath (1)')
+        ->and($meditationTypeOptions[$otherMeditationType->id])->toBe('Body (1)');
+});
+
+test('practice pages use russian translations when the selected filament locale is russian', function () {
+    $focusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Anxiety', 'ru' => 'Тревога'],
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+    ]);
+
+    $this->withSession(['locale' => 'ru'])
+        ->get(PracticeResource::getUrl('create'))
+        ->assertSuccessful()
+        ->assertSeeText('Создать')
+        ->assertSeeText('Общее')
+        ->assertSeeText('Категоризация')
+        ->assertSeeText('Медиа и длительность')
+        ->assertSeeText('Переводы');
+
+    $this->withSession(['locale' => 'ru'])
+        ->get(PracticeResource::getUrl('index', [
+            'filters' => [
+                'day' => ['value' => 22],
+                'focus_problem_id' => ['value' => $focusProblem->id],
+            ],
+        ]))
+        ->assertSuccessful()
+        ->assertSeeText('Практики')
+        ->assertSeeText('Активные фильтры')
+        ->assertSeeText('День: 22 день')
+        ->assertSeeText('Проблема фокуса: Тревога')
+        ->assertSeeText('Удалить фильтр');
+});
+
+test('practice list filter indicators show selected values for url filters', function () {
+    $focusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Anxiety', 'ru' => 'Тревога'],
+    ]);
+    $experienceLevel = ExperienceLevel::factory()->create([
+        'title' => ['en' => 'Beginner', 'ru' => 'Новичок'],
+    ]);
+    $moduleChoice = ModuleChoice::factory()->create([
+        'title' => ['en' => 'Main', 'ru' => 'Главный'],
+    ]);
+    $meditationType = MeditationType::factory()->create([
+        'title' => ['en' => 'Breath', 'ru' => 'Дыхание'],
+    ]);
+
+    Practice::factory()->create([
+        'day' => 22,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    $component = Livewire::withQueryParams([
+        'filters' => [
+            'day' => ['value' => 22],
+            'focus_problem_id' => ['value' => $focusProblem->id],
+            'experience_level_id' => ['value' => $experienceLevel->id],
+            'module_choice_id' => ['value' => $moduleChoice->id],
+            'meditation_type_id' => ['value' => $meditationType->id],
+        ],
+    ])->test(ListPractices::class);
+
+    $indicatorLabels = collect($component->instance()->getTable()->getFilterIndicators())
+        ->map(fn ($indicator): string => (string) $indicator->getLabel())
+        ->values()
+        ->all();
+
+    expect($indicatorLabels)->toContain('Day: 22 Day')
+        ->and($indicatorLabels)->toContain('Focus Problem: Anxiety')
+        ->and($indicatorLabels)->toContain('Experience Level: Beginner')
+        ->and($indicatorLabels)->toContain('Module Choice: Main')
+        ->and($indicatorLabels)->toContain('Meditation Type: Breath')
+        ->and($indicatorLabels)->not->toContain('Day: 22 Day (1)')
+        ->and($indicatorLabels)->not->toContain("Focus Problem: {$focusProblem->id}")
+        ->and($indicatorLabels)->not->toContain("Experience Level: {$experienceLevel->id}")
+        ->and($indicatorLabels)->not->toContain("Module Choice: {$moduleChoice->id}")
+        ->and($indicatorLabels)->not->toContain("Meditation Type: {$meditationType->id}");
 });
 
 test('can render practice create page', function () {
@@ -162,6 +411,68 @@ test('practice create page can prefill values from active filters', function () 
             'module_choice_id' => $moduleChoice->id,
             'meditation_type_id' => $meditationType->id,
         ]);
+});
+
+test('practice form selects show option counts in dropdown labels', function () {
+    $focusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Anxiety', 'ru' => 'Тревога'],
+    ]);
+    $otherFocusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Fatigue', 'ru' => 'Усталость'],
+    ]);
+    $experienceLevel = ExperienceLevel::factory()->create([
+        'title' => ['en' => 'Beginner', 'ru' => 'Новичок'],
+    ]);
+    $otherExperienceLevel = ExperienceLevel::factory()->create([
+        'title' => ['en' => 'Advanced', 'ru' => 'Продвинутый'],
+    ]);
+    $moduleChoice = ModuleChoice::factory()->create([
+        'title' => ['en' => 'Main', 'ru' => 'Главный'],
+    ]);
+    $otherModuleChoice = ModuleChoice::factory()->create([
+        'title' => ['en' => 'Nutrition', 'ru' => 'Питание'],
+    ]);
+    $meditationType = MeditationType::factory()->create([
+        'title' => ['en' => 'Breath', 'ru' => 'Дыхание'],
+    ]);
+    $otherMeditationType = MeditationType::factory()->create([
+        'title' => ['en' => 'Body', 'ru' => 'Тело'],
+    ]);
+
+    Practice::factory()->count(2)->create([
+        'day' => 1,
+        'focus_problem_id' => $focusProblem->id,
+        'experience_level_id' => $experienceLevel->id,
+        'module_choice_id' => $moduleChoice->id,
+        'meditation_type_id' => $meditationType->id,
+    ]);
+
+    Practice::factory()->create([
+        'day' => 2,
+        'focus_problem_id' => $otherFocusProblem->id,
+        'experience_level_id' => $otherExperienceLevel->id,
+        'module_choice_id' => $otherModuleChoice->id,
+        'meditation_type_id' => $otherMeditationType->id,
+    ]);
+
+    $form = Livewire::test(CreatePractice::class)
+        ->instance()
+        ->getSchema('form');
+
+    $fields = $form->getFlatFields(withHidden: true);
+
+    expect($fields['day']->getOptions())->toMatchArray([
+        1 => '1 Day (2)',
+        2 => '2 Day (1)',
+    ])
+        ->and($fields['focus_problem_id']->getOptions()[$focusProblem->id])->toBe('Anxiety (2)')
+        ->and($fields['focus_problem_id']->getOptions()[$otherFocusProblem->id])->toBe('Fatigue (1)')
+        ->and($fields['experience_level_id']->getOptions()[$experienceLevel->id])->toBe('Beginner (2)')
+        ->and($fields['experience_level_id']->getOptions()[$otherExperienceLevel->id])->toBe('Advanced (1)')
+        ->and($fields['module_choice_id']->getOptions()[$moduleChoice->id])->toBe('Main (2)')
+        ->and($fields['module_choice_id']->getOptions()[$otherModuleChoice->id])->toBe('Nutrition (1)')
+        ->and($fields['meditation_type_id']->getOptions()[$meditationType->id])->toBe('Breath (2)')
+        ->and($fields['meditation_type_id']->getOptions()[$otherMeditationType->id])->toBe('Body (1)');
 });
 
 test('can create a practice with uploaded media', function () {

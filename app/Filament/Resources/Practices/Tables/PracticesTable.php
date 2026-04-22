@@ -9,11 +9,9 @@ use App\Models\ModuleChoice;
 use App\Models\Practice;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\BaseFilter;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -31,79 +29,61 @@ class PracticesTable
         array $hiddenColumns = [],
         array $excludedFilters = [],
         array $headerActions = [],
-    ): Table
-    {
+    ): Table {
         return $table
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('day')
-                    ->label('Day')
+                    ->label(__('admin.resources.practices.fields.day'))
                     ->sortable()
                     ->formatStateUsing(fn (int $state): string => Practice::formatDay($state))
                     ->width('100px'),
                 TextColumn::make(Practice::translatedAttribute('title'))
-                    ->label('Title')
+                    ->label(__('admin.resources.practices.fields.title'))
                     ->searchable()
                     ->sortable()
                     ->limit(50)
                     ->width('250px'),
                 TextColumn::make(Practice::translatedAttribute('description'))
-                    ->label('Description')
+                    ->label(__('admin.resources.practices.fields.description'))
                     ->hidden()
                     ->limit(80)
                     ->wrap()
                     ->width('320px'),
                 TextColumn::make('focusProblem.'.FocusProblem::titleAttribute())
-                    ->label('Focus Problem')
+                    ->label(__('admin.resources.practices.fields.focus_problem'))
                     ->hidden(in_array('focus_problem_id', $hiddenColumns, true))
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('experienceLevel.'.ExperienceLevel::titleAttribute())
-                    ->label('Level')
+                    ->label(__('admin.resources.practices.short_labels.experience_level'))
                     ->hidden(in_array('experience_level_id', $hiddenColumns, true))
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('moduleChoice.'.ModuleChoice::titleAttribute())
-                    ->label('Module')
+                    ->label(__('admin.resources.practices.short_labels.module_choice'))
                     ->hidden(in_array('module_choice_id', $hiddenColumns, true))
                     ->badge()
                     ->sortable()
                     ->width('150px'),
                 TextColumn::make('meditationType.'.MeditationType::titleAttribute())
-                    ->label('Type')
+                    ->label(__('admin.resources.practices.short_labels.meditation_type'))
                     ->hidden(in_array('meditation_type_id', $hiddenColumns, true))
                     ->badge()
                     ->sortable()
                     ->width('120px'),
                 TextColumn::make('duration')
-                    ->label('Duration')
+                    ->label(__('admin.resources.practices.fields.duration'))
                     ->formatStateUsing(fn (int $state): string => Practice::formatDuration($state))
                     ->sortable()
                     ->width('100px'),
-                ImageColumn::make('image_path')
-                    ->label('Image')
-                    ->disk(Practice::mediaDisk())
-                    ->visibility('public')
-                    ->square()
-                    ->width(80)
-                    ->height(80),
-                TextColumn::make('video_path')
-                    ->label('Video')
-                    ->formatStateUsing(fn (?string $state): string => filled($state) ? basename($state) : 'No video')
-                    ->url(fn (Practice $record): ?string => $record->getVideoUrl())
-                    ->openUrlInNewTab(),
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('admin.resources.practices.fields.is_active'))
                     ->boolean()
                     ->sortable()
                     ->width('80px'),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable()
-                    ->width('150px'),
             ])
             ->filters(array_values(array_filter([
                 static::dayFilter(
@@ -111,25 +91,25 @@ class PracticesTable
                 ),
                 static::taxonomyFilter(
                     field: 'focus_problem_id',
-                    label: 'Focus Problem',
+                    label: __('admin.resources.practices.fields.focus_problem'),
                     relationship: 'focusProblem',
                     excluded: in_array('focus_problem_id', $excludedFilters, true),
                 ),
                 static::taxonomyFilter(
                     field: 'experience_level_id',
-                    label: 'Experience Level',
+                    label: __('admin.resources.practices.fields.experience_level'),
                     relationship: 'experienceLevel',
                     excluded: in_array('experience_level_id', $excludedFilters, true),
                 ),
                 static::taxonomyFilter(
                     field: 'module_choice_id',
-                    label: 'Module Choice',
+                    label: __('admin.resources.practices.fields.module_choice'),
                     relationship: 'moduleChoice',
                     excluded: in_array('module_choice_id', $excludedFilters, true),
                 ),
                 static::taxonomyFilter(
                     field: 'meditation_type_id',
-                    label: 'Meditation Type',
+                    label: __('admin.resources.practices.fields.meditation_type'),
                     relationship: 'meditationType',
                     excluded: in_array('meditation_type_id', $excludedFilters, true),
                 ),
@@ -157,8 +137,11 @@ class PracticesTable
         }
 
         return SelectFilter::make('day')
-            ->label('Day')
-            ->options(Practice::dayOptionsWithCounts());
+            ->label(__('admin.resources.practices.fields.day'))
+            ->indicateUsing(fn (array $state): ?string => static::dayFilterIndicator($state))
+            ->options(fn (HasTable $livewire): array => static::dayOptionsWithCounts(
+                static::tableFilters($livewire),
+            ));
     }
 
     private static function taxonomyFilter(
@@ -176,9 +159,15 @@ class PracticesTable
             ->relationship(
                 $relationship,
                 'id',
-                fn (Builder $query) => $query
+                fn (Builder $query, HasTable $livewire) => $query
                     ->forFilamentOptions()
-                    ->withCount('practices'),
+                    ->withCount([
+                        'practices' => fn (Builder $query) => static::applyPracticeFilters(
+                            $query,
+                            static::tableFilters($livewire),
+                            excludedField: $field,
+                        ),
+                    ]),
             )
             ->getOptionLabelFromRecordUsing(
                 fn ($record): string => Practice::formatCountedLabel(
@@ -186,7 +175,89 @@ class PracticesTable
                     (int) $record->practices_count,
                 ),
             )
+            ->indicateUsing(
+                fn (array $state): ?string => Practice::relationFilterIndicator(
+                    $field,
+                    $state['value'] ?? null,
+                    app()->getLocale(),
+                    $label,
+                ),
+            )
             ->searchable()
             ->preload();
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private static function dayFilterIndicator(array $state): ?string
+    {
+        $value = $state['value'] ?? null;
+
+        if (blank($value)) {
+            return null;
+        }
+
+        return __('admin.resources.practices.filters.indicator', [
+            'label' => __('admin.resources.practices.fields.day'),
+            'value' => Practice::formatDay((int) $value),
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<int, string>
+     */
+    private static function dayOptionsWithCounts(array $filters): array
+    {
+        $counts = static::applyPracticeFilters(
+            Practice::query()->select(['day']),
+            $filters,
+            excludedField: 'day',
+        )
+            ->pluck('day')
+            ->countBy();
+
+        return collect(Practice::dayOptions())
+            ->mapWithKeys(fn (string $label, int $day): array => [
+                $day => Practice::formatCountedLabel($label, (int) ($counts[$day] ?? 0)),
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  Builder<Practice>  $query
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Practice>
+     */
+    private static function applyPracticeFilters(
+        Builder $query,
+        array $filters,
+        ?string $excludedField = null,
+    ): Builder {
+        return $query
+            ->forDay($excludedField === 'day' ? null : static::filterValue($filters, 'day'))
+            ->forFocusProblem($excludedField === 'focus_problem_id' ? null : static::filterValue($filters, 'focus_problem_id'))
+            ->forExperienceLevel($excludedField === 'experience_level_id' ? null : static::filterValue($filters, 'experience_level_id'))
+            ->forModuleChoice($excludedField === 'module_choice_id' ? null : static::filterValue($filters, 'module_choice_id'))
+            ->forMeditationType($excludedField === 'meditation_type_id' ? null : static::filterValue($filters, 'meditation_type_id'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    private static function filterValue(array $filters, string $field): ?int
+    {
+        $value = data_get($filters, "{$field}.value");
+
+        return filled($value) ? (int) $value : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function tableFilters(HasTable $livewire): array
+    {
+        return is_array($livewire->tableFilters ?? null) ? $livewire->tableFilters : [];
     }
 }

@@ -32,3 +32,17 @@ test('can filter languages by active tab', function () {
         ->assertCanSeeTableRecords([$enabledLanguage])
         ->assertCanNotSeeTableRecords([$disabledLanguage]);
 });
+
+test('language resource uses russian translations when the selected filament locale is russian', function () {
+    Language::query()->create(['code' => 'en', 'name' => 'English', 'is_enabled' => true]);
+    Language::query()->create(['code' => 'ru', 'name' => 'Russian', 'is_enabled' => true]);
+
+    $this->withSession(['locale' => 'ru'])
+        ->get(LanguageResource::getUrl('index'))
+        ->assertSuccessful()
+        ->assertSeeText('Языки')
+        ->assertSeeText('Все языки')
+        ->assertSeeText('Включенные')
+        ->assertSeeText('Английский')
+        ->assertSeeText('Русский');
+});
