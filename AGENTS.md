@@ -184,6 +184,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - The `title` / `description` (and any translated column) must be `json` columns in the migration and cast as `'array'` in the model.
 - Models with translated fields must expose `getTitle(string $locale): string` and `getDescription(string $locale): ?string` helpers with EN fallback.
 - The Filament resource must override `getRecordTitle(?Model $record)` to return a string (e.g., `$record->getTitle(app()->getLocale())`) — never set `$recordTitleAttribute` to a JSON column.
+- Filament tables MUST use the current application locale for translated columns (e.g., `TextColumn::make("title." . app()->getLocale())`) to ensure the display matches the language selected in the top switcher.
 - The admin panel language switcher uses the `bezhansalleh/filament-language-switch` package. Configure it in `AppServiceProvider::boot()` by calling `LanguageSwitch::configureUsing()` with locales loaded dynamically from `Language::where('is_enabled', true)`. Never build a custom Livewire switcher — use this package.
 
 </laravel-boost-guidelines>

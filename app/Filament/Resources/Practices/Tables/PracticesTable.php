@@ -13,6 +13,8 @@ class PracticesTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->defaultSort('id', 'desc')
             ->columns([
@@ -20,13 +22,13 @@ class PracticesTable
                     ->label('Day')
                     ->sortable()
                     ->formatStateUsing(fn (int $state): string => "{$state} Day"),
-                TextColumn::make('title.en')
-                    ->label('Title (EN)')
+                TextColumn::make("title.{$locale}")
+                    ->label('Title')
                     ->searchable()
                     ->sortable()
                     ->limit(50),
-                TextColumn::make('description.en')
-                    ->label('Description (EN)')
+                TextColumn::make("description.{$locale}")
+                    ->label('Description')
                     ->limit(80)
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
