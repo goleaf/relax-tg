@@ -11,16 +11,14 @@ class FocusProblem extends Model
 
     protected $fillable = [
         'title',
-        'is_enabled',
     ];
 
     protected $casts = [
         'title' => 'array',
-        'is_enabled' => 'boolean',
     ];
 
-    public function getTitle(string $locale = 'en'): string
+    public function getTitle(string $locale): string
     {
-        return $this->title[$locale] ?? $this->title['en'] ?? '';
+        return $this->title[$locale] ?? '';
     }
 }

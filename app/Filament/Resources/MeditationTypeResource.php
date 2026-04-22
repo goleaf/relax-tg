@@ -9,11 +9,9 @@ use App\Models\MeditationType;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -40,12 +38,6 @@ class MeditationTypeResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('General')
-                    ->schema([
-                        Toggle::make('is_enabled')
-                            ->label('Enabled')
-                            ->default(true),
-                    ]),
                 Section::make('Translations')
                     ->schema([
                         LanguageTabsBuilder::make(function (Language $language) {
@@ -69,9 +61,6 @@ class MeditationTypeResource extends Resource
                 TextColumn::make("title.{$locale}")
                     ->label('Title')
                     ->searchable()
-                    ->sortable(),
-                IconColumn::make('is_enabled')
-                    ->boolean()
                     ->sortable(),
             ])
             ->filters([

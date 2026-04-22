@@ -13,7 +13,6 @@ class ExperienceLevelFactory extends Factory
                 'en' => $this->faker->unique()->word(),
                 'ru' => $this->faker->word(),
             ],
-            'is_enabled' => true,
         ];
     }
 }
