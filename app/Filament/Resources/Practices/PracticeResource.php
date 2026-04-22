@@ -9,6 +9,7 @@ use App\Filament\Resources\Practices\Schemas\PracticeForm;
 use App\Filament\Resources\Practices\Tables\PracticesTable;
 use App\Models\Practice;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -25,6 +26,21 @@ class PracticeResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Content';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationItems(): array
+    {
+        $items = [];
+
+        for ($i = 1; $i <= 29; $i++) {
+            $items[] = NavigationItem::make("{$i} Day")
+                ->group('Daily Practices')
+                ->icon(static::getNavigationIcon())
+                ->isActiveWhen(fn () => request()->routeIs('filament.admin.resources.practices.index') && request()->query('day') == $i)
+                ->url(static::getUrl('index', ['day' => $i]));
+        }
+
+        return $items;
+    }
 
     /** @param Practice|null $record */
     public static function getRecordTitle(?Model $record): string|Htmlable|null

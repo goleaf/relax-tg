@@ -33,6 +33,7 @@ class PracticeFactory extends Factory
         }
 
         return [
+            'day' => $this->faker->numberBetween(1, 29),
             'title' => $title,
             'description' => $description,
         ];

@@ -37,6 +37,7 @@ test('can render practice create page', function () {
 test('can create a practice', function () {
     Livewire::test(CreatePractice::class)
         ->fillForm([
+            'day' => 1,
             'title.en' => 'Mindful Breathing',
             'description.en' => 'A simple breathing practice for daily calm.',
         ])

@@ -16,6 +16,10 @@ class PracticesTable
         return $table
             ->defaultSort('id', 'desc')
             ->columns([
+                TextColumn::make('day')
+                    ->label('Day')
+                    ->sortable()
+                    ->formatStateUsing(fn (int $state): string => "{$state} Day"),
                 TextColumn::make('title.en')
                     ->label('Title (EN)')
                     ->searchable()

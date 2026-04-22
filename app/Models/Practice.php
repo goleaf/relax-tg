@@ -21,6 +21,7 @@ class Practice extends Model
     use HasFactory;
 
     protected $fillable = [
+        'day',
         'title',
         'description',
     ];
