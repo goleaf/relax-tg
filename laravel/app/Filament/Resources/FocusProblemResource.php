@@ -95,7 +95,8 @@ class FocusProblemResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (FocusProblem $record): bool => $record->isInUse()),
             ])
             ->toolbarActions([
                 //
@@ -108,6 +109,7 @@ class FocusProblemResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return FocusProblem::query()
+            ->withPracticeUsage()
             ->forFilamentIndex();
     }
 

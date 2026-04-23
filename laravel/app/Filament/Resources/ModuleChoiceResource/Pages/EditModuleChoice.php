@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ModuleChoiceResource\Pages;
 
 use App\Filament\Resources\ModuleChoiceResource;
+use App\Models\ModuleChoice;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,8 @@ class EditModuleChoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->hidden(fn (ModuleChoice $record): bool => $record->isInUse()),
         ];
     }
 }

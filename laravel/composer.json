@@ -59,6 +59,48 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:ci": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --compact"
+        ],
+        "test:feature": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --compact --testsuite=Feature"
+        ],
+        "test:unit": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --compact --testsuite=Unit"
+        ],
+        "test:coverage": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --coverage"
+        ],
+        "test:coverage:ci": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --coverage --no-ansi"
+        ],
+        "test:profile": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --profile"
+        ],
+        "audit:architecture": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --compact tests/Feature/Audit/AuditReadinessTest.php tests/Feature/Filament/AdminAuthenticationTest.php"
+        ],
+        "audit:dependencies": [
+            "composer validate --strict --no-check-publish",
+            "composer audit --locked",
+            "npm audit --audit-level=high"
+        ],
+        "audit:ci": [
+            "@php artisan config:clear --ansi",
+            "composer validate --strict --no-check-publish",
+            "composer audit --locked",
+            "npm audit --audit-level=high",
+            "phpstan analyse --memory-limit=2G",
+            "@php artisan test --compact tests/Feature/Audit/AuditReadinessTest.php tests/Feature/Filament/AdminAuthenticationTest.php",
+            "npm run build"
+        ],
         "analyse": "phpstan analyse --memory-limit=2G",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

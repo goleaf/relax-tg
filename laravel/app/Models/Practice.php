@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -60,6 +61,10 @@ class Practice extends Model
         'module_choice_id' => ['model' => ModuleChoice::class, 'label_key' => 'module_choice'],
         'meditation_type_id' => ['model' => MeditationType::class, 'label_key' => 'meditation_type'],
     ];
+
+    private const AGGREGATE_CACHE_VERSION_KEY = 'practice:aggregate-cache-version';
+
+    private const TAXONOMY_CACHE_VERSION_KEY = 'practice:taxonomy-cache-version';
 
     /**
      * @var array<int, string>
@@ -186,6 +191,16 @@ class Practice extends Model
     public static function mediaDisk(): string
     {
         return self::MEDIA_DISK;
+    }
+
+    public static function bumpAggregateCacheVersion(): void
+    {
+        self::incrementCacheVersion(self::AGGREGATE_CACHE_VERSION_KEY);
+    }
+
+    public static function bumpTaxonomyCacheVersion(): void
+    {
+        self::incrementCacheVersion(self::TAXONOMY_CACHE_VERSION_KEY);
     }
 
     public static function imageDirectory(): string
@@ -471,11 +486,15 @@ class Practice extends Model
      */
     public static function dayCounts(): array
     {
-        return once(fn (): array => static::query()
-            ->selectDayCounts()
-            ->pluck('total', 'day')
-            ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
-            ->all());
+        return Cache::remember(
+            self::aggregateCacheKey('day-counts'),
+            now()->addMinutes(15),
+            fn (): array => static::query()
+                ->selectDayCounts()
+                ->pluck('total', 'day')
+                ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
+                ->all(),
+        );
     }
 
     /**
@@ -483,11 +502,15 @@ class Practice extends Model
      */
     public static function averageDurationMinutesByDay(): array
     {
-        return once(fn (): array => static::query()
-            ->selectAverageDurationMinutesByDay()
-            ->pluck('average_minutes', 'day')
-            ->mapWithKeys(fn (mixed $average, mixed $day): array => self::floatMapEntry($day, $average))
-            ->all());
+        return Cache::remember(
+            self::aggregateCacheKey('average-duration-minutes-by-day'),
+            now()->addMinutes(15),
+            fn (): array => static::query()
+                ->selectAverageDurationMinutesByDay()
+                ->pluck('average_minutes', 'day')
+                ->mapWithKeys(fn (mixed $average, mixed $day): array => self::floatMapEntry($day, $average))
+                ->all(),
+        );
     }
 
     /**
@@ -495,11 +518,94 @@ class Practice extends Model
      */
     public static function mediaReadyCountsByDay(): array
     {
-        return once(fn (): array => static::query()
-            ->selectMediaReadyCountsByDay()
-            ->pluck('total', 'day')
-            ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
-            ->all());
+        return Cache::remember(
+            self::aggregateCacheKey('media-ready-counts-by-day'),
+            now()->addMinutes(15),
+            fn (): array => static::query()
+                ->selectMediaReadyCountsByDay()
+                ->pluck('total', 'day')
+                ->mapWithKeys(fn (mixed $count, mixed $day): array => self::integerMapEntry($day, $count))
+                ->all(),
+        );
+    }
+
+    public static function averageDurationSeconds(): int
+    {
+        return Cache::remember(
+            self::aggregateCacheKey('average-duration-seconds'),
+            now()->addMinutes(15),
+            fn (): int => (int) round((float) (static::query()->avg('duration') ?? 0)),
+        );
+    }
+
+    public static function mediaReadyPracticeCount(): int
+    {
+        return Cache::remember(
+            self::aggregateCacheKey('media-ready-practice-count'),
+            now()->addMinutes(15),
+            fn (): int => static::query()
+                ->whereNotNull('image_path')
+                ->whereNotNull('video_path')
+                ->count(),
+        );
+    }
+
+    /**
+     * @return array<int, array{count: int, label: string}>
+     */
+    public static function focusProblemDistribution(string $locale): array
+    {
+        return Cache::remember(
+            self::combinedCacheKey("focus-problem-distribution:{$locale}"),
+            now()->addMinutes(15),
+            fn (): array => FocusProblem::query()
+                ->forFilamentOptions()
+                ->withCount('practices')
+                ->get()
+                ->map(function (FocusProblem $focusProblem) use ($locale): array {
+                    return [
+                        'label' => $focusProblem->getTitle($locale),
+                        'count' => $focusProblem->practices_count ?? 0,
+                    ];
+                })
+                ->filter(fn (array $segment): bool => $segment['count'] > 0)
+                ->values()
+                ->all(),
+        );
+    }
+
+    /**
+     * @param  array{
+     *     day?: int|null,
+     *     focus_problem_id?: int|null,
+     *     experience_level_id?: int|null,
+     *     module_choice_id?: int|null,
+     *     meditation_type_id?: int|null
+     * }  $filters
+     */
+    public static function telegramListCacheKey(
+        array $filters,
+        string $locale,
+        int $perPage,
+        bool $activeOnly,
+        int $page,
+    ): string {
+        return self::combinedCacheKey('telegram:list:'.self::cacheHash([
+            'active_only' => $activeOnly,
+            'day' => $filters['day'] ?? null,
+            'experience_level_id' => $filters['experience_level_id'] ?? null,
+            'focus_problem_id' => $filters['focus_problem_id'] ?? null,
+            'locale' => $locale,
+            'meditation_type_id' => $filters['meditation_type_id'] ?? null,
+            'module_choice_id' => $filters['module_choice_id'] ?? null,
+            'page' => $page,
+            'per_page' => $perPage,
+        ]));
+    }
+
+    public static function telegramShowCacheKey(int $practiceId, string $locale): string
+    {
+        return self::combinedCacheKey("telegram:show:{$practiceId}:{$locale}");
     }
 
     /**
@@ -598,7 +704,7 @@ class Practice extends Model
         /** @var array<string, array<int, string>> $titles */
         static $titles = [];
 
-        $cacheKey = "{$field}:{$locale}";
+        $cacheKey = self::taxonomyCacheKey("relation-filter-titles:{$field}:{$locale}");
 
         if (array_key_exists($cacheKey, $titles)) {
             return $titles[$cacheKey];
@@ -613,13 +719,17 @@ class Practice extends Model
         /** @var class-string<FocusProblem|ExperienceLevel|ModuleChoice|MeditationType> $modelClass */
         $modelClass = $filter['model'];
 
-        return $titles[$cacheKey] = $modelClass::query()
-            ->forFilamentOptions()
-            ->get()
-            ->mapWithKeys(fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): array => [
-                $record->id => $record->getTitle($locale),
-            ])
-            ->all();
+        return $titles[$cacheKey] = Cache::remember(
+            $cacheKey,
+            now()->addHour(),
+            fn (): array => $modelClass::query()
+                ->forFilamentOptions()
+                ->get()
+                ->mapWithKeys(fn (FocusProblem|ExperienceLevel|ModuleChoice|MeditationType $record): array => [
+                    $record->id => $record->getTitle($locale),
+                ])
+                ->all(),
+        );
     }
 
     private function captureMediaPathsPendingDeletion(): void
@@ -712,5 +822,59 @@ class Practice extends Model
         return [
             (int) $key => (float) $value,
         ];
+    }
+
+    private static function aggregateCacheKey(string $suffix): string
+    {
+        return "practice:aggregate:{$suffix}:v".self::cacheVersion(self::AGGREGATE_CACHE_VERSION_KEY);
+    }
+
+    private static function taxonomyCacheKey(string $suffix): string
+    {
+        return "practice:taxonomy:{$suffix}:v".self::cacheVersion(self::TAXONOMY_CACHE_VERSION_KEY);
+    }
+
+    private static function combinedCacheKey(string $suffix): string
+    {
+        return "practice:combined:{$suffix}:a".self::cacheVersion(self::AGGREGATE_CACHE_VERSION_KEY)
+            .':t'.self::cacheVersion(self::TAXONOMY_CACHE_VERSION_KEY);
+    }
+
+    private static function cacheVersion(string $key): int
+    {
+        $version = Cache::get($key);
+
+        if (! is_numeric($version)) {
+            Cache::forever($key, 1);
+
+            return 1;
+        }
+
+        return (int) $version;
+    }
+
+    private static function incrementCacheVersion(string $key): void
+    {
+        if (Cache::add($key, 1, now()->addYears(5))) {
+            return;
+        }
+
+        Cache::increment($key);
+    }
+
+    /**
+     * @param  array<string, bool|int|string|null>  $payload
+     */
+    private static function cacheHash(array $payload): string
+    {
+        ksort($payload);
+
+        $encodedPayload = json_encode($payload, JSON_INVALID_UTF8_SUBSTITUTE);
+
+        if ($encodedPayload === false) {
+            $encodedPayload = '[]';
+        }
+
+        return sha1($encodedPayload);
     }
 }

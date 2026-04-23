@@ -2,19 +2,12 @@
 
 namespace App\Filament\Support;
 
-use App\Models\FocusProblem;
 use App\Models\Language;
 use App\Models\Practice;
 use Closure;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class PracticeDashboardData
 {
-    /**
-     * @var EloquentCollection<int, FocusProblem>|null
-     */
-    private ?EloquentCollection $focusProblems = null;
-
     /**
      * @var array<int, int>|null
      */
@@ -53,7 +46,7 @@ class PracticeDashboardData
 
     public function averageDurationSeconds(): int
     {
-        return $this->averageDurationSeconds ??= (int) round((float) (Practice::query()->avg('duration') ?? 0));
+        return $this->averageDurationSeconds ??= Practice::averageDurationSeconds();
     }
 
     /**
@@ -83,9 +76,7 @@ class PracticeDashboardData
 
     public function enabledLanguages(): int
     {
-        return $this->enabledLanguages ??= Language::query()
-            ->enabled()
-            ->count();
+        return $this->enabledLanguages ??= Language::enabledCount();
     }
 
     /**
@@ -93,16 +84,7 @@ class PracticeDashboardData
      */
     public function focusProblemDistribution(): array
     {
-        return $this->focusProblemDistribution ??= $this->focusProblems()
-            ->map(function (FocusProblem $focusProblem): array {
-                return [
-                    'label' => $focusProblem->getTitle(app()->getLocale()),
-                    'count' => $focusProblem->practices_count ?? 0,
-                ];
-            })
-            ->filter(fn (array $segment): bool => $segment['count'] > 0)
-            ->values()
-            ->all();
+        return $this->focusProblemDistribution ??= Practice::focusProblemDistribution(app()->getLocale());
     }
 
     public function formattedAverageDuration(): string
@@ -123,10 +105,7 @@ class PracticeDashboardData
 
     public function mediaReadyPractices(): int
     {
-        return $this->mediaReadyPractices ??= Practice::query()
-            ->whereNotNull('image_path')
-            ->whereNotNull('video_path')
-            ->count();
+        return $this->mediaReadyPractices ??= Practice::mediaReadyPracticeCount();
     }
 
     /**
@@ -152,17 +131,6 @@ class PracticeDashboardData
     public function totalPractices(): int
     {
         return array_sum($this->dayCounts());
-    }
-
-    /**
-     * @return EloquentCollection<int, FocusProblem>
-     */
-    private function focusProblems(): EloquentCollection
-    {
-        return $this->focusProblems ??= FocusProblem::query()
-            ->forFilamentOptions()
-            ->withCount('practices')
-            ->get();
     }
 
     /**

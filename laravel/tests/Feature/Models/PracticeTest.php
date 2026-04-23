@@ -164,3 +164,29 @@ test('it can aggregate navigation counts by day', function () {
         ->and((int) $counts[3])->toBe(1)
         ->and(isset($counts[2]))->toBeFalse();
 });
+
+test('it refreshes cached aggregate metrics after practice changes', function () {
+    expect(Practice::dayCounts())->toBeEmpty();
+
+    $practice = Practice::factory()->create(['day' => 2]);
+
+    expect(Practice::dayCounts())->toBe([2 => 1]);
+
+    $practice->update(['day' => 3]);
+
+    expect(Practice::dayCounts())->toBe([3 => 1]);
+});
+
+test('it refreshes cached relation filter titles after taxonomy changes', function () {
+    $focusProblem = FocusProblem::factory()->create([
+        'title' => ['en' => 'Anxiety'],
+    ]);
+
+    expect(Practice::relationFilterTitle('focus_problem_id', $focusProblem->id, 'en'))->toBe('Anxiety');
+
+    $focusProblem->update([
+        'title' => ['en' => 'Calm'],
+    ]);
+
+    expect(Practice::relationFilterTitle('focus_problem_id', $focusProblem->id, 'en'))->toBe('Calm');
+});

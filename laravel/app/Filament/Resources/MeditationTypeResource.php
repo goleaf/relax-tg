@@ -95,7 +95,8 @@ class MeditationTypeResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (MeditationType $record): bool => $record->isInUse()),
             ])
             ->toolbarActions([
                 //
@@ -108,6 +109,7 @@ class MeditationTypeResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return MeditationType::query()
+            ->withPracticeUsage()
             ->forFilamentIndex();
     }
 

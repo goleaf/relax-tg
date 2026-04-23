@@ -95,7 +95,8 @@ class ModuleChoiceResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (ModuleChoice $record): bool => $record->isInUse()),
             ])
             ->toolbarActions([
                 //
@@ -108,6 +109,7 @@ class ModuleChoiceResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return ModuleChoice::query()
+            ->withPracticeUsage()
             ->forFilamentIndex();
     }
 

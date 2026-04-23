@@ -1,0 +1,103 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          coverage: pcov
+          extensions: intl, mbstring, pdo_sqlite, sqlite3
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Run compact test suite
+        if: github.event_name != 'pull_request'
+        run: composer test:ci
+
+      - name: Compare line coverage against base branch
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build
+
+          composer test:coverage:ci > build/head-coverage.txt 2>&1
+          cat build/head-coverage.txt
+
+          head_coverage=$(php -r '
+          $output = file_get_contents($argv[1]);
+          if (! preg_match("/Lines:\\s+([0-9.]+)%/", $output, $matches)) {
+              fwrite(STDERR, "Unable to determine head branch line coverage.\n");
+              exit(1);
+          }
+          echo $matches[1];
+          ' build/head-coverage.txt)
+
+          echo "Head line coverage: ${head_coverage}%"
+
+          git checkout --force "origin/${{ github.base_ref }}"
+
+          composer install --no-interaction --no-progress --prefer-dist
+          php artisan key:generate --ansi --force
+
+          composer test:coverage:ci > build/base-coverage.txt 2>&1
+          cat build/base-coverage.txt
+
+          base_coverage=$(php -r '
+          $output = file_get_contents($argv[1]);
+          if (! preg_match("/Lines:\\s+([0-9.]+)%/", $output, $matches)) {
+              fwrite(STDERR, "Unable to determine base branch line coverage.\n");
+              exit(1);
+          }
+          echo $matches[1];
+          ' build/base-coverage.txt)
+
+          echo "Base line coverage: ${base_coverage}%"
+
+          php -r '
+          $head = (float) $argv[1];
+          $base = (float) $argv[2];
+
+          if ($head + 0.0001 < $base) {
+              fwrite(STDERR, sprintf(
+                  "Coverage decreased from %.2f%% to %.2f%%.\n",
+                  $base,
+                  $head,
+              ));
+
+              exit(1);
+          }
+
+          fwrite(STDOUT, sprintf(
+              "Coverage gate passed: %.2f%% >= %.2f%%.\n",
+              $head,
+              $base,
+          ));
+          ' "$head_coverage" "$base_coverage"

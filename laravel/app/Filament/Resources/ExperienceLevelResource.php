@@ -95,7 +95,8 @@ class ExperienceLevelResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (ExperienceLevel $record): bool => $record->isInUse()),
             ])
             ->toolbarActions([
                 //
@@ -108,6 +109,7 @@ class ExperienceLevelResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return ExperienceLevel::query()
+            ->withPracticeUsage()
             ->forFilamentIndex();
     }
 

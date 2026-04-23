@@ -31,13 +31,12 @@ class LanguageTabsBuilder
      */
     public static function make(callable $fieldFactory): Tabs
     {
-        $languages = Language::query()
-            ->forEnabledContentTabs()
-            ->get();
-
         $tabs = [];
 
-        foreach ($languages as $language) {
+        foreach (Language::enabledContentTabs() as $attributes) {
+            $language = new Language;
+            $language->forceFill($attributes);
+
             $tabs[] = Tabs\Tab::make($language->code)
                 ->label(Language::displayName($language->code))
                 ->schema($fieldFactory($language));

@@ -6,7 +6,6 @@ use Illuminate\Support\Str;
 use RuntimeException;
 use Telegram\Bot\Api;
 use Telegram\Bot\BotsManager;
-use Telegram\Bot\Objects\Update as UpdateObject;
 
 class TelegramBotService
 {
@@ -17,11 +16,6 @@ class TelegramBotService
     public function bot(): Api
     {
         return $this->botsManager->bot();
-    }
-
-    public function getWebhookUpdate(): UpdateObject
-    {
-        return $this->bot()->getWebhookUpdate(false);
     }
 
     /**

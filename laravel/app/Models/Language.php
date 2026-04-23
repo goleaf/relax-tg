@@ -6,6 +6,7 @@ use Database\Factories\LanguageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
@@ -25,6 +26,8 @@ class Language extends Model
      */
     private const SUPPORTED_INTERFACE_LOCALES = ['de', 'en', 'es', 'fr', 'it', 'lt', 'pl', 'ru', 'uk'];
 
+    private const CONTENT_CACHE_VERSION_KEY = 'language:content-cache-version';
+
     protected $fillable = [
         'code',
         'name',
@@ -35,6 +38,27 @@ class Language extends Model
     protected $casts = [
         'is_enabled' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Language $language): void {
+            if (filled($language->native_name)) {
+                return;
+            }
+
+            $code = trim($language->code);
+
+            if ($code === '') {
+                return;
+            }
+
+            $fallbackName = filled($language->name)
+                ? $language->name
+                : null;
+
+            $language->native_name = self::nativeName($code, $fallbackName);
+        });
+    }
 
     /**
      * @param  Builder<self>  $query
@@ -111,21 +135,87 @@ class Language extends Model
         return is_string($language) ? $language : Str::upper($code);
     }
 
+    public static function bumpContentCacheVersion(): void
+    {
+        if (Cache::add(self::CONTENT_CACHE_VERSION_KEY, 1, now()->addYears(5))) {
+            return;
+        }
+
+        Cache::increment(self::CONTENT_CACHE_VERSION_KEY);
+    }
+
+    /**
+     * @return list<array{
+     *     id: int,
+     *     code: string,
+     *     name: string,
+     *     native_name: string|null,
+     *     is_enabled: bool
+     * }>
+     */
+    public static function enabledContentTabs(): array
+    {
+        return Cache::remember(
+            self::contentCacheKey('enabled-content-tabs'),
+            now()->addMinutes(30),
+            fn (): array => array_values(static::query()
+                ->forEnabledContentTabs()
+                ->get()
+                ->map(fn (Language $language): array => [
+                    'id' => $language->id,
+                    'code' => $language->code,
+                    'name' => $language->name,
+                    'native_name' => $language->native_name,
+                    'is_enabled' => $language->is_enabled,
+                ])
+                ->all()),
+        );
+    }
+
     /**
      * @return list<string>
      */
     public static function enabledCodes(): array
     {
-        return array_values(static::query()
-            ->enabled()
-            ->pluck('code')
-            ->filter(fn (mixed $code): bool => is_string($code) && ($code !== ''))
-            ->values()
-            ->all());
+        return Cache::remember(
+            self::contentCacheKey('enabled-codes'),
+            now()->addMinutes(30),
+            fn (): array => array_values(static::query()
+                ->enabled()
+                ->orderBy('id')
+                ->pluck('code')
+                ->filter(fn (mixed $code): bool => is_string($code) && ($code !== ''))
+                ->values()
+                ->all()),
+        );
+    }
+
+    public static function enabledCount(): int
+    {
+        return Cache::remember(
+            self::contentCacheKey('enabled-count'),
+            now()->addMinutes(30),
+            fn (): int => static::query()
+                ->enabled()
+                ->count(),
+        );
     }
 
     public function flagIcon(): string
     {
         return 'flag-language-'.Str::lower($this->code);
+    }
+
+    private static function contentCacheKey(string $suffix): string
+    {
+        $version = Cache::get(self::CONTENT_CACHE_VERSION_KEY);
+
+        if (! is_numeric($version)) {
+            Cache::forever(self::CONTENT_CACHE_VERSION_KEY, 1);
+
+            $version = 1;
+        }
+
+        return "language:content:{$suffix}:v{$version}";
     }
 }
